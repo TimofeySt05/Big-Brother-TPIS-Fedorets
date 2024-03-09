@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\WpfApp1",
+    "\\WpfApp1\\bin\\Release",
+    "\\WpfApp1\\Properties"
   ],
-  "SelectedNode": "\\C:\\Users\\ul\\Source\\Repos\\TimofeySt05\\Big-Brother-TPIS-Fedorets",
+  "SelectedNode": "\\WpfApp1\\WpfApp1.csproj",
   "PreviewInSolutionExplorer": false
 }
