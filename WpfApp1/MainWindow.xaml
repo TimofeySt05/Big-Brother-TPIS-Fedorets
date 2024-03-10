@@ -9,6 +9,7 @@
     <Grid>
         <Button Content="Choose file" HorizontalAlignment="Left" Height="46" Margin="217,334,0,0" VerticalAlignment="Top" Width="94" Click="Button_Click"/>
         <Image HorizontalAlignment="Left" Height="212" Margin="129,82,0,0" VerticalAlignment="Top" Width="268" Source="{Binding Video_source}"/>
+        <Button Content="Video" HorizontalAlignment="Left" Margin="480,334,0,0" VerticalAlignment="Top" Click="Button_Click_1" Height="46" Width="84"/>
 
     </Grid>
 </Window>
