@@ -26,8 +26,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using static System.Net.WebRequestMethods;
 using System.Windows.Threading;
-//hhhh
-
+using OpenCvSharp;
+//using Window = OpenCvSharp.Window;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Text.RegularExpressions;
 
 
 namespace WpfApp1
@@ -89,15 +91,17 @@ namespace WpfApp1
         }
     }
 
-                
+    
 
-        public partial class MainWindow : Window
-        {
+        public partial class MainWindow : System.Windows.Window
+    {
 
         string Path;
         int currentIndex = 0;
         string[] fileNames;
         private DispatcherTimer timer;
+        
+
 
         public MainWindow()
         {
@@ -107,7 +111,11 @@ namespace WpfApp1
             timer.Interval = TimeSpan.FromSeconds(2);
             timer.Tick += Timer_Tick;
             timer.Start();
+            
+            
         }
+
+        
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -130,6 +138,40 @@ namespace WpfApp1
                     currentIndex=0;
                 }
             }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
+        {
+            System.Windows.Forms.OpenFileDialog fbd = new System.Windows.Forms.OpenFileDialog(); //выбор файла. Есть в папке с проектом
+            fbd.ShowDialog();
+            string VPath = fbd.FileName;
+
+            var videoFile = VPath;
+            var capture = new VideoCapture(videoFile);
+            var window = new OpenCvSharp.Window("Video Frame by Frame");  //для вывода в окно
+            var image = new Mat();
+            var dic_image = new Dictionary<int, Bitmap>(); // словарь с кадрами
+
+            int i = 0;
+            int i_nom = 0;
+            
+            while (capture.IsOpened()) //Получение кадров
+            {
+                capture.Read(image);
+                if (image.Empty()) break;
+                i++;
+                if (i % 30 == 0) // берем 1 из 30 кадров
+                {
+                    Bitmap frame = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image); // в битмап
+                    dic_image[i_nom] = frame;  // словарь с кадрами
+                    i_nom++;
+                    window.ShowImage(image);  //для вывода в окно
+                    if (Cv2.WaitKey(1) == 113) // Q
+                        break;
+                }
+            }
+            window.Close();
+            Console.WriteLine(dic_image.Count);
         }
     }
  }

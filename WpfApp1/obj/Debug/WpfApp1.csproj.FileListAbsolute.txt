@@ -13,3 +13,38 @@ C:\Users\ul\Source\Repos\TimofeySt05\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug
 C:\Users\ul\Source\Repos\TimofeySt05\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.csproj.CoreCompileInputs.cache
 C:\Users\ul\Source\Repos\TimofeySt05\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.exe
 C:\Users\ul\Source\Repos\TimofeySt05\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.pdb
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\WpfApp1.exe.config
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\WpfApp1.exe
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\WpfApp1.pdb
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\OpenCvSharp.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Buffers.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Memory.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Numerics.Vectors.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\OpenCvSharp.xml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Buffers.xml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Memory.xml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Numerics.Vectors.xml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.csproj.AssemblyReference.cache
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\MainWindow.g.cs
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\App.g.cs
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1_MarkupCompile.cache
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1_MarkupCompile.lref
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\MainWindow.baml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.g.resources
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.Properties.Resources.resources
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.csproj.GenerateResource.cache
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.csproj.CoreCompileInputs.cache
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.csproj.CopyComplete
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.exe
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1.pdb
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\OpenCvSharp.Extensions.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Drawing.Common.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\OpenCvSharp.Extensions.xml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\System.Drawing.Common.xml
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\obj\Debug\WpfApp1_Content.g.cs
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\dll\x86\OpenCvSharpExtern.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\dll\x86\opencv_videoio_ffmpeg490.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\dll\x64\OpenCvSharpExtern.dll
+C:\My documents\GitHub\Big-Brother-TPIS-Fedorets\WpfApp1\bin\Debug\dll\x64\opencv_videoio_ffmpeg490_64.dll
