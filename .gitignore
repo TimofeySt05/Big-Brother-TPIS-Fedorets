@@ -33,6 +33,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+!**Debug/dll
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -55,7 +56,7 @@ nunit-*.xml
 [Dd]ebugPS/
 [Rr]eleasePS/
 dlldata.c
-!**/Debug/dll
+
 
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
