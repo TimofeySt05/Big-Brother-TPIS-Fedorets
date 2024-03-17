@@ -30,7 +30,8 @@ using OpenCvSharp;
 //using Window = OpenCvSharp.Window;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Text.RegularExpressions;
-
+using Rectangle = System.Windows.Shapes.Rectangle;
+using Point = System.Windows.Point;
 
 namespace WpfApp1
 {
@@ -103,9 +104,8 @@ namespace WpfApp1
         List<BitmapSource> Frames = new List<BitmapSource>();
         private DispatcherTimer timer;
         int flag = 0;
-
-
-
+        System.Windows.Point startPoint;
+        bool selectFlag = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -205,6 +205,36 @@ namespace WpfApp1
             flag = 2;
             Console.WriteLine(Frames.Count);
         }
+
+
+        private void rec_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            selectFlag = true;
+            rec.CaptureMouse();
+            startPoint = e.GetPosition(rec);
+
+        }
+
+        private void rec_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (selectFlag)
+            {
+                Point newPoint = e.GetPosition((IInputElement)rec.Parent);
+                Canvas.SetLeft(rec, newPoint.X - startPoint.X);
+                Canvas.SetTop(rec, newPoint.Y - startPoint.Y);
+
+                
+            }
+
+        }
+
+        private void rec_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            selectFlag = false;
+            rec.ReleaseMouseCapture();
+        }
+
+
         //test
     }
 }

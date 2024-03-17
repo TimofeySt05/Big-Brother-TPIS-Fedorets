@@ -8,8 +8,12 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Button Content="Choose file" HorizontalAlignment="Left" Height="46" Margin="217,334,0,0" VerticalAlignment="Top" Width="94" Click="Button_Click"/>
-        <Image HorizontalAlignment="Left" Height="212" Margin="129,82,0,0" VerticalAlignment="Top" Width="268" Source="{Binding Video_source}"/>
+        
         <Button Content="Video" HorizontalAlignment="Left" Margin="480,334,0,0" VerticalAlignment="Top" Click="Button_Click_1" Height="46" Width="84"/>
+        <Image Name="image" HorizontalAlignment="Left" Height="257" Margin="67,37,0,0" VerticalAlignment="Top" Width="465" Source="{Binding Video_source}"/>
+        <Canvas x:Name="canv" Width="465" Height="257" Margin="67,37,268,140" ClipToBounds="True">
+            <Rectangle x:Name="rec" Width="100" Height="100" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="197" Canvas.Top="143" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
+        </Canvas>
 
     </Grid>
 </Window>
