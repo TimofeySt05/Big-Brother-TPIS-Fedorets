@@ -7,13 +7,17 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button Content="Choose file" HorizontalAlignment="Left" Height="46" Margin="217,334,0,0" VerticalAlignment="Top" Width="94" Click="Button_Click"/>
-        
-        <Button Content="Video" HorizontalAlignment="Left" Margin="480,334,0,0" VerticalAlignment="Top" Click="Button_Click_1" Height="46" Width="84"/>
-        <Image Name="image" HorizontalAlignment="Left" Height="257" Margin="67,37,0,0" VerticalAlignment="Top" Width="465" Source="{Binding Video_source}"/>
+        <Button Content="Choose file" HorizontalAlignment="Left" Height="46" Margin="112,334,0,0" VerticalAlignment="Top" Width="94" Click="Button_Click"/>
+
+        <Button Content="Video" HorizontalAlignment="Left" Margin="316,334,0,0" VerticalAlignment="Top" Click="Button_Click_1" Height="46" Width="84"/>
         <Canvas x:Name="canv" Width="465" Height="257" Margin="67,37,268,140" ClipToBounds="True">
+            <Image Name="image" HorizontalAlignment="Left" Height="257" VerticalAlignment="Top" Width="465" Source="{Binding Video_source}" Canvas.Top="1"/>
             <Rectangle x:Name="rec" Width="100" Height="100" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="197" Canvas.Top="143" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
         </Canvas>
+
+        <Image x:Name="img" Margin="577,66,32,168"/>
+        <ListBox d:ItemsSource="{d:SampleData ItemCount=5}" Name="box" Margin="593,290,48,10" RenderTransformOrigin="0.43,-0.486" ItemsSource="{Binding List_Of_Frames}" SelectionChanged="ListBox_SelectionChanged"/>
+
 
     </Grid>
 </Window>

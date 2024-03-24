@@ -90,6 +90,26 @@ namespace WpfApp1
                 }
             }
         }
+
+        private Dictionary<int, BitmapSource> list_of_frames;
+        public Dictionary<int, BitmapSource> List_Of_Frames
+        {
+            get { return list_of_frames; }
+            set
+            {
+                list_of_frames = value;
+                OnPropertyChanged("List_Of_Frames");
+            }
+        }
+
+        //public List<string> list_of_puctures;
+        //public List<string> List_Of_Pictires
+        //{
+        //    get { return list_of_puctures; }
+        //    set { list_of_puctures = value;
+        //        OnPropertyChanged("List_Of_Pictires");
+        //    }
+        //}
     }
 
 
@@ -101,11 +121,14 @@ namespace WpfApp1
         int currentIndex = 0;
         string[] fileNames;
         double Sec = 0.05;
-        List<BitmapSource> Frames = new List<BitmapSource>();
+        //List<BitmapSource> Frames = new List<BitmapSource>();
         private DispatcherTimer timer;
         int flag = 0;
         System.Windows.Point startPoint;
         bool selectFlag = false;
+        Dictionary<int, BitmapSource> dic_image = new Dictionary<int, BitmapSource>();
+        Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -113,7 +136,7 @@ namespace WpfApp1
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(Sec);
-            timer.Tick += Timer_Tick;
+            //timer.Tick += Timer_Tick;
             timer.Start();
 
         }
@@ -139,42 +162,60 @@ namespace WpfApp1
             fbd.ShowDialog();
             Path = fbd.SelectedPath;
             if (Path != "" && Path != null) fileNames = Directory.GetFiles(Path).ToArray();
-        }
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            if (flag == 1)
+            for (int i = 0; i < fileNames.Length; i++)
             {
-                if (Path != "" && Path != null)
-                {
-                    if (currentIndex < fileNames.Length)
-                    {
-                        (DataContext as Video).Video_name = fileNames[currentIndex];
-                        currentIndex++;
-                    }
-                    else
-                    {
-                        currentIndex = 0;
-                    }
-                }
-            }
-            else if (flag == 2)
-            {
-                if (Path != "" && Path != null)
-                {
-                    if (currentIndex < Frames.Count)
-                    {
-                        (DataContext as Video).Video_source = Frames[currentIndex];
-                        Console.WriteLine($"{currentIndex}  " + Frames[currentIndex]);
-                        currentIndex++;
-                    }
-                    else
-                    {
-                        currentIndex = 0;
-                    }
-                }
+                BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
 
+                // Преобразование BitmapImage в BitmapSource
+                BitmapSource bitmapSource = bitmapImage as BitmapSource;
+
+                // Добавляем BitmapSource в словарь с ключом - номером фотографии
+                dic_image2.Add(i, bitmapSource);
             }
+            (DataContext as Video).List_Of_Frames = dic_image2;
+            (DataContext as Video).Video_source = dic_image2[0];
+
+
+
+
+
         }
+        //private void Timer_Tick(object sender, EventArgs e)
+        //{
+        //    if (flag == 1)
+        //    {
+        //        if (Path != "" && Path != null)
+        //        {
+        //            if (currentIndex < fileNames.Length)
+        //            {
+        //                (DataContext as Video).Video_name = fileNames[currentIndex];
+        //                currentIndex++;
+        //            }
+        //            else
+        //            {
+        //                currentIndex = 0;
+        //            }
+        //        }
+        //    }
+        //    else if (flag == 2)
+        //    {
+        //        if (Path != "" && Path != null)
+        //        {
+        //            if (currentIndex < Frames.Count)
+        //            {
+        //                (DataContext as Video).Video_source = Frames[currentIndex];
+        //                //Console.WriteLine($"{currentIndex}  " + Frames[currentIndex]);
+        //                currentIndex++;
+        //            }
+        //            else
+        //            {
+        //                currentIndex = 0;
+        //            }
+        //        }
+
+        //    }
+        //}
 
         private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
         {
@@ -187,23 +228,28 @@ namespace WpfApp1
             var image = new Mat();
             //var dic_image = new Dictionary<int, Bitmap>(); // словарь с кадрами
             int i = 0;
-
-
             while (capture.IsOpened()) //Получение кадров
             {
-
                 capture.Read(image);
                 if (image.Empty()) break;
                 if (i % 3 == 0)
                 {
                     BitmapSource frame = Convert(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image)); // в битмап
-                    Frames.Add(frame);
+                    dic_image[i] = frame;
                 }//добавляем конвертированный в битмап сурс битмап в список битмапов
                 i++;
                 //window.ShowImage(image);  //для вывода в окно
             }
+            (DataContext as Video).List_Of_Frames = dic_image;
+            (DataContext as Video).Video_source = dic_image[0];
+            foreach (var frame in dic_image)
+            {
+                Console.WriteLine($"Key: {frame.Key}, Value: {frame.Value}");
+            }
             flag = 2;
-            Console.WriteLine(Frames.Count);
+
+
+            //Console.WriteLine(Frames.Count);
         }
 
 
@@ -212,6 +258,7 @@ namespace WpfApp1
             selectFlag = true;
             rec.CaptureMouse();
             startPoint = e.GetPosition(rec);
+            Console.WriteLine(rec.Width * rec.Height);
 
         }
 
@@ -223,7 +270,16 @@ namespace WpfApp1
                 Canvas.SetLeft(rec, newPoint.X - startPoint.X);
                 Canvas.SetTop(rec, newPoint.Y - startPoint.Y);
 
-                
+                //Point PosCanv0 = canv.TranslatePoint(new Point(0, 0), this);
+                //Point PosCanv1 = rec.TranslatePoint(PosCanv0, this);
+
+                Point PosCanv = rec.TranslatePoint(new Point(0, 0), canv);
+
+                double X = PosCanv.X;
+                double Y = PosCanv.Y;
+
+                CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)X, (int)Y, (int)rec.ActualWidth, (int)rec.ActualHeight));
+                img.Source = croppedBitmap;
             }
 
         }
@@ -231,10 +287,23 @@ namespace WpfApp1
         private void rec_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             selectFlag = false;
+
             rec.ReleaseMouseCapture();
         }
 
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int selectedKey = box.SelectedIndex;
 
-        //test
+            // Проверяем, есть ли выбранный ключ в словаре dic_image
+            if (dic_image.ContainsKey(selectedKey))
+            {
+                // Устанавливаем выбранный кадр в Image
+                (DataContext as Video).Video_source = dic_image[selectedKey]; // Здесь SelectedImage - это ваш Image в XAML
+            }
+
+
+            //test
+        }
     }
 }
