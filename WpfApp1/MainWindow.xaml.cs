@@ -117,7 +117,7 @@ namespace WpfApp1
     public partial class MainWindow : System.Windows.Window
     {
 
-        string Path = "";
+        string Path = " ";
         int currentIndex = 0;
         string[] fileNames;
         double Sec = 0.05;
@@ -162,22 +162,22 @@ namespace WpfApp1
             fbd.ShowDialog();
             Path = fbd.SelectedPath;
             if (Path != "" && Path != null) fileNames = Directory.GetFiles(Path).ToArray();
-            for (int i = 0; i < fileNames.Length; i++)
+            if (fileNames != null)
             {
-                BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                for (int i = 0; i < fileNames.Length; i++)
+                {
+                    BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
 
-                // Преобразование BitmapImage в BitmapSource
-                BitmapSource bitmapSource = bitmapImage as BitmapSource;
+                    // Преобразование BitmapImage в BitmapSource
+                    BitmapSource bitmapSource = bitmapImage as BitmapSource;
 
-                // Добавляем BitmapSource в словарь с ключом - номером фотографии
-                dic_image2.Add(i, bitmapSource);
+                    // Добавляем BitmapSource в словарь с ключом - номером фотографии
+                    dic_image2.Add(i, bitmapSource);
+                }
+                (DataContext as Video).List_Of_Frames = dic_image2;
+                (DataContext as Video).Video_source = dic_image2[0];
             }
-            (DataContext as Video).List_Of_Frames = dic_image2;
-            (DataContext as Video).Video_source = dic_image2[0];
-
-
-
 
 
         }
@@ -219,10 +219,12 @@ namespace WpfApp1
 
         private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
         {
+            flag = 2;
             System.Windows.Forms.OpenFileDialog fbd = new System.Windows.Forms.OpenFileDialog(); //выбор файла. Есть в папке с проектом
             fbd.ShowDialog();
-            Path = fbd.FileName;
-            var videoFile = Path;
+             Path = fbd.FileName;
+            string videoFile=" ";
+            if (Path != "" && Path != null) videoFile = Path;
             var capture = new VideoCapture(videoFile);
             //var window = new OpenCvSharp.Window("Video Frame by Frame");  //для вывода в окно
             var image = new Mat();
@@ -241,12 +243,13 @@ namespace WpfApp1
                 //window.ShowImage(image);  //для вывода в окно
             }
             (DataContext as Video).List_Of_Frames = dic_image;
-            (DataContext as Video).Video_source = dic_image[0];
+            if (dic_image.Count!=0) (DataContext as Video).Video_source = dic_image[0];
+
             foreach (var frame in dic_image)
             {
                 Console.WriteLine($"Key: {frame.Key}, Value: {frame.Value}");
             }
-            flag = 2;
+            
 
 
             //Console.WriteLine(Frames.Count);
@@ -264,23 +267,25 @@ namespace WpfApp1
 
         private void rec_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            if (selectFlag)
+            if (selectFlag && (DataContext as Video).Video_source!=null)
             {
                 Point newPoint = e.GetPosition((IInputElement)rec.Parent);
-                Canvas.SetLeft(rec, newPoint.X - startPoint.X);
-                Canvas.SetTop(rec, newPoint.Y - startPoint.Y);
+                if ((newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0 && (newPoint.X - startPoint.X)<=canv.ActualWidth && (newPoint.Y - startPoint.Y)<=canv.ActualHeight)
+                {
+                    Canvas.SetLeft(rec, newPoint.X - startPoint.X);
+                    Canvas.SetTop(rec, newPoint.Y - startPoint.Y);
+                }
 
                 //Point PosCanv0 = canv.TranslatePoint(new Point(0, 0), this);
                 //Point PosCanv1 = rec.TranslatePoint(PosCanv0, this);
+                
+                Point PosCanv = rec.TranslatePoint(new Point(0,0), canv);
 
-                Point PosCanv = rec.TranslatePoint(new Point(0, 0), canv);
-
-                double X = PosCanv.X;
-                double Y = PosCanv.Y;
-
-                CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)X, (int)Y, (int)rec.ActualWidth, (int)rec.ActualHeight));
+                CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)PosCanv.X, (int)PosCanv.Y, (int)rec.ActualWidth, (int)rec.ActualHeight));    
                 img.Source = croppedBitmap;
+             
             }
+
 
         }
 
@@ -295,14 +300,16 @@ namespace WpfApp1
         {
             int selectedKey = box.SelectedIndex;
 
-            // Проверяем, есть ли выбранный ключ в словаре dic_image
-            if (dic_image.ContainsKey(selectedKey))
+            
+            if (dic_image.ContainsKey(selectedKey) && flag==2)
             {
-                // Устанавливаем выбранный кадр в Image
-                (DataContext as Video).Video_source = dic_image[selectedKey]; // Здесь SelectedImage - это ваш Image в XAML
+ 
+                (DataContext as Video).Video_source = dic_image[selectedKey]; 
             }
-
-
+            if (dic_image2.ContainsKey(selectedKey) && flag == 1)
+            {
+                (DataContext as Video).Video_source = dic_image2[selectedKey];
+            }
             //test
         }
     }
