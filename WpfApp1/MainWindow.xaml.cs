@@ -32,6 +32,8 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Text.RegularExpressions;
 using Rectangle = System.Windows.Shapes.Rectangle;
 using Point = System.Windows.Point;
+using System.Drawing.Imaging;
+using System.Net;
 
 namespace WpfApp1
 {
@@ -128,6 +130,7 @@ namespace WpfApp1
         bool selectFlag = false;
         Dictionary<int, BitmapSource> dic_image = new Dictionary<int, BitmapSource>();
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
+        double crop_im;
 
         public MainWindow()
         {
@@ -138,7 +141,35 @@ namespace WpfApp1
             timer.Interval = TimeSpan.FromSeconds(Sec);
             //timer.Tick += Timer_Tick;
             timer.Start();
+        }
 
+        Bitmap GetBitmap(BitmapSource source)
+        {
+            Bitmap bmp = new Bitmap(
+              source.PixelWidth,
+              source.PixelHeight,
+              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(
+              new System.Drawing.Rectangle(new System.Drawing.Point(0,0), bmp.Size),
+              ImageLockMode.WriteOnly,
+              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(
+              Int32Rect.Empty,
+              data.Scan0,
+              data.Height * data.Stride,
+              data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
+        }
+
+        public static CroppedBitmap GetCroppedBitmap(BitmapSource src, double x, double y, double w, double h )
+        {
+            double factorX, factorY;
+
+            factorX = src.PixelWidth / src.Width;
+            factorY = src.PixelHeight / src.Height;
+            //Console.WriteLine(factorY);
+            return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w * factorX), (int)Math.Round(h * factorY)));
         }
 
         public static BitmapSource Convert(System.Drawing.Bitmap bitmap)
@@ -175,6 +206,7 @@ namespace WpfApp1
                     // Добавляем BitmapSource в словарь с ключом - номером фотографии
                     dic_image2.Add(i, bitmapSource);
                 }
+
                 (DataContext as Video).List_Of_Frames = dic_image2;
                 (DataContext as Video).Video_source = dic_image2[0];
             }
@@ -242,6 +274,8 @@ namespace WpfApp1
                 i++;
                 //window.ShowImage(image);  //для вывода в окно
             }
+
+
             (DataContext as Video).List_Of_Frames = dic_image;
             if (dic_image.Count!=0) (DataContext as Video).Video_source = dic_image[0];
 
@@ -261,8 +295,15 @@ namespace WpfApp1
             selectFlag = true;
             rec.CaptureMouse();
             startPoint = e.GetPosition(rec);
-            Console.WriteLine(rec.Width * rec.Height);
-
+            //Console.WriteLine(rec.Width * rec.Height);
+            if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+            {
+                crop_im = (DataContext as Video).Video_source.Width / canv.ActualWidth;
+            }
+            else
+            {
+                crop_im = (DataContext as Video).Video_source.Height / canv.ActualHeight;
+            }
         }
 
         private void rec_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -270,20 +311,36 @@ namespace WpfApp1
             if (selectFlag && (DataContext as Video).Video_source!=null)
             {
                 Point newPoint = e.GetPosition((IInputElement)rec.Parent);
-                if ((newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0 && (newPoint.X - startPoint.X)<=canv.ActualWidth && (newPoint.Y - startPoint.Y)<=canv.ActualHeight)
+                /*if ((newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0 && (newPoint.X - startPoint.X)<=canv.ActualWidth && (newPoint.Y - startPoint.Y)<=canv.ActualHeight)
+                {
+                    Canvas.SetLeft(rec, newPoint.X - startPoint.X);
+                    Canvas.SetTop(rec, newPoint.Y - startPoint.Y);
+                }*/
+                if((newPoint.X - startPoint.X+rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X)>0 && (newPoint.Y - startPoint.Y) >0)
                 {
                     Canvas.SetLeft(rec, newPoint.X - startPoint.X);
                     Canvas.SetTop(rec, newPoint.Y - startPoint.Y);
                 }
 
-                //Point PosCanv0 = canv.TranslatePoint(new Point(0, 0), this);
-                //Point PosCanv1 = rec.TranslatePoint(PosCanv0, this);
                 
-                Point PosCanv = rec.TranslatePoint(new Point(0,0), canv);
+                Point PosCanv = rec.TranslatePoint(new Point(0,0), image);
 
-                CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)PosCanv.X, (int)PosCanv.Y, (int)rec.ActualWidth, (int)rec.ActualHeight));    
-                img.Source = croppedBitmap;
-             
+                //Console.WriteLine(rec_can.ActualWidth);
+                //Console.WriteLine(image.ActualWidth);
+                if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+                {
+                     crop_im = (DataContext as Video).Video_source.Width / image.ActualWidth;
+                }
+                else 
+                { 
+                     crop_im = (DataContext as Video).Video_source.Height / image.ActualHeight; 
+                }
+
+
+                //CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)PosCanv.X*4, (int)PosCanv.Y*4, (int)rec.ActualWidth, (int)rec.ActualHeight));    
+                img.Source = GetCroppedBitmap((DataContext as Video).Video_source, PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
+                
+                
             }
 
 
@@ -299,18 +356,17 @@ namespace WpfApp1
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             int selectedKey = box.SelectedIndex;
+            Canvas.SetLeft(rec, 0);
+            Canvas.SetTop(rec, 0);
 
-            
             if (dic_image.ContainsKey(selectedKey) && flag==2)
             {
- 
                 (DataContext as Video).Video_source = dic_image[selectedKey]; 
             }
             if (dic_image2.ContainsKey(selectedKey) && flag == 1)
             {
                 (DataContext as Video).Video_source = dic_image2[selectedKey];
             }
-            //test
         }
     }
 }
