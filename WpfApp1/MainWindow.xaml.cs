@@ -203,8 +203,10 @@ namespace WpfApp1
                     // Преобразование BitmapImage в BitmapSource
                     BitmapSource bitmapSource = bitmapImage as BitmapSource;
 
-                    // Добавляем BitmapSource в словарь с ключом - номером фотографии
-                    dic_image2.Add(i, bitmapSource);
+                    if (!dic_image2.ContainsKey(i)) {
+                        dic_image2.Add(i, bitmapSource);
+                            }
+
                 }
 
                 (DataContext as Video).List_Of_Frames = dic_image2;
@@ -269,7 +271,8 @@ namespace WpfApp1
                 if (i % 3 == 0)
                 {
                     BitmapSource frame = Convert(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image)); // в битмап
-                    dic_image[i] = frame;
+                    if(!dic_image.ContainsKey(i)) dic_image[i] = frame;
+
                 }//добавляем конвертированный в битмап сурс битмап в список битмапов
                 i++;
                 //window.ShowImage(image);  //для вывода в окно
