@@ -132,6 +132,11 @@ namespace WpfApp1
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
         double crop_im;
 
+        Mat imageCv;
+        Mat tempCv;
+        double minVal, maxVal;
+        OpenCvSharp.Point minLoc, maxLoc;
+        Point TP;
         public MainWindow()
         {
             InitializeComponent();
@@ -263,11 +268,20 @@ namespace WpfApp1
             //var window = new OpenCvSharp.Window("Video Frame by Frame");  //для вывода в окно
             var image = new Mat();
             //var dic_image = new Dictionary<int, Bitmap>(); // словарь с кадрами
+            
             int i = 0;
             while (capture.IsOpened()) //Получение кадров
             {
                 capture.Read(image);
+                
                 if (image.Empty()) break;
+                /*
+                if (i == 0)
+                {
+                    imageCv = image;
+                    var window = new OpenCvSharp.Window("Video Frame by Frame");
+                    window.ShowImage(imageCv);
+                }*/
                 if (i % 3 == 0)
                 {
                     BitmapSource frame = Convert(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image)); // в битмап
@@ -281,12 +295,12 @@ namespace WpfApp1
 
             (DataContext as Video).List_Of_Frames = dic_image;
             if (dic_image.Count!=0) (DataContext as Video).Video_source = dic_image[0];
-
+            /*
             foreach (var frame in dic_image)
             {
                 Console.WriteLine($"Key: {frame.Key}, Value: {frame.Value}");
             }
-            
+            */
 
 
             //Console.WriteLine(Frames.Count);
@@ -307,6 +321,9 @@ namespace WpfApp1
             {
                 crop_im = (DataContext as Video).Video_source.Height / canv.ActualHeight;
             }
+            
+
+
         }
 
         private void rec_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -327,7 +344,7 @@ namespace WpfApp1
 
                 
                 Point PosCanv = rec.TranslatePoint(new Point(0,0), image);
-
+                TP = rec.TranslatePoint(new Point(0, 0), image);
                 //Console.WriteLine(rec_can.ActualWidth);
                 //Console.WriteLine(image.ActualWidth);
                 if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
@@ -338,10 +355,15 @@ namespace WpfApp1
                 { 
                      crop_im = (DataContext as Video).Video_source.Height / image.ActualHeight; 
                 }
-
-
-                //CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)PosCanv.X*4, (int)PosCanv.Y*4, (int)rec.ActualWidth, (int)rec.ActualHeight));    
-                img.Source = GetCroppedBitmap((DataContext as Video).Video_source, PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
+                
+                var tempCrB = GetCroppedBitmap((DataContext as Video).Video_source, PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
+                //CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)PosCanv.X*4, (int)PosCanv.Y*4, (int)rec.ActualWidth, (int)rec.ActualHeight));
+                tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(tempCrB));
+                /*
+                var window = new OpenCvSharp.Window("Video Frame by Frame");
+                window.ShowImage(tempCv);
+                */
+                img.Source = tempCrB;
                 
                 
             }
@@ -370,6 +392,21 @@ namespace WpfApp1
             {
                 (DataContext as Video).Video_source = dic_image2[selectedKey];
             }
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap((DataContext as Video).Video_source));
+            //Console.WriteLine(imageCv);
+            //Console.WriteLine(tempCv);
+            //var result = new Mat();
+            
+            imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed).MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
+            //IplImage result = new IplImage(w, h, BitDepth.F32, 1);
+            //result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
+            Console.WriteLine("maxLoc: {0}, maxVal: {1}", maxLoc, maxVal);
+            Console.WriteLine(TP.X*crop_im+ rec.ActualWidth*crop_im/2);
+            Console.WriteLine(TP.Y* crop_im + rec.ActualHeight*crop_im/2);
         }
     }
 }
