@@ -123,7 +123,6 @@ namespace WpfApp1
         int currentIndex = 0;
         string[] fileNames;
         double Sec = 0.05;
-        //List<BitmapSource> Frames = new List<BitmapSource>();
         private DispatcherTimer timer;
         int flag = 0;
         System.Windows.Point startPoint;
@@ -312,15 +311,20 @@ namespace WpfApp1
             selectFlag = true;
             rec.CaptureMouse();
             startPoint = e.GetPosition(rec);
-            //Console.WriteLine(rec.Width * rec.Height);
-            if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+            sreault.Visibility = Visibility.Hidden;
+            if (selectFlag && (DataContext as Video).Video_source != null)
             {
-                crop_im = (DataContext as Video).Video_source.Width / canv.ActualWidth;
+                if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+                {
+                    crop_im = (DataContext as Video).Video_source.Width / image.ActualWidth;
+                }
+                else
+                {
+                    crop_im = (DataContext as Video).Video_source.Height / image.ActualHeight;
+                }
+
             }
-            else
-            {
-                crop_im = (DataContext as Video).Video_source.Height / canv.ActualHeight;
-            }
+                
             
 
 
@@ -331,11 +335,7 @@ namespace WpfApp1
             if (selectFlag && (DataContext as Video).Video_source!=null)
             {
                 Point newPoint = e.GetPosition((IInputElement)rec.Parent);
-                /*if ((newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0 && (newPoint.X - startPoint.X)<=canv.ActualWidth && (newPoint.Y - startPoint.Y)<=canv.ActualHeight)
-                {
-                    Canvas.SetLeft(rec, newPoint.X - startPoint.X);
-                    Canvas.SetTop(rec, newPoint.Y - startPoint.Y);
-                }*/
+               
                 if((newPoint.X - startPoint.X+rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X)>0 && (newPoint.Y - startPoint.Y) >0)
                 {
                     Canvas.SetLeft(rec, newPoint.X - startPoint.X);
@@ -345,17 +345,8 @@ namespace WpfApp1
                 
                 Point PosCanv = rec.TranslatePoint(new Point(0,0), image);
                 TP = rec.TranslatePoint(new Point(0, 0), image);
-                //Console.WriteLine(rec_can.ActualWidth);
-                //Console.WriteLine(image.ActualWidth);
-                if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
-                {
-                     crop_im = (DataContext as Video).Video_source.Width / image.ActualWidth;
-                }
-                else 
-                { 
-                     crop_im = (DataContext as Video).Video_source.Height / image.ActualHeight; 
-                }
-                
+
+
                 var tempCrB = GetCroppedBitmap((DataContext as Video).Video_source, PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
                 //CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)PosCanv.X*4, (int)PosCanv.Y*4, (int)rec.ActualWidth, (int)rec.ActualHeight));
                 tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(tempCrB));
@@ -363,6 +354,7 @@ namespace WpfApp1
                 var window = new OpenCvSharp.Window("Video Frame by Frame");
                 window.ShowImage(tempCv);
                 */
+                
                 img.Source = tempCrB;
                 
                 
@@ -374,7 +366,7 @@ namespace WpfApp1
         private void rec_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             selectFlag = false;
-
+            
             rec.ReleaseMouseCapture();
         }
 
@@ -396,17 +388,34 @@ namespace WpfApp1
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap((DataContext as Video).Video_source));
-            //Console.WriteLine(imageCv);
-            //Console.WriteLine(tempCv);
-            //var result = new Mat();
-            
-            imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed).MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
-            //IplImage result = new IplImage(w, h, BitDepth.F32, 1);
-            //result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
-            Console.WriteLine("maxLoc: {0}, maxVal: {1}", maxLoc, maxVal);
-            Console.WriteLine(TP.X*crop_im+ rec.ActualWidth*crop_im/2);
-            Console.WriteLine(TP.Y* crop_im + rec.ActualHeight*crop_im/2);
+            if ((DataContext as Video).Video_source != null && img.Source !=null)
+            {
+                imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap((DataContext as Video).Video_source));
+                var result = new Mat();
+                result = imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed);
+                result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
+
+                //var window = new OpenCvSharp.Window("Video Frame by Frame");
+                //window.ShowImage(result);    // карта сходности
+
+
+                //IplImage result = new IplImage(w, h, BitDepth.F32, 1);
+                //result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
+                //Console.WriteLine("Wight VS = {0}, im = {1}",(DataContext as Video).Video_source.Width, image.ActualWidth);
+                //Console.WriteLine(imageCv.Width);
+                //Console.WriteLine(result.Width);
+                //Console.WriteLine(crop_res);
+                Console.WriteLine(maxVal);
+                //Console.WriteLine("maxLoc: X = {0},Y = {1}, maxVal: {2}", maxLoc.X, maxLoc.Y, maxVal);
+                Console.WriteLine("\nTemp X = {0}, Y = {1}", TP.X * 1.0 / image.ActualWidth * (DataContext as Video).Video_source.Width, TP.Y * 1.0 / image.ActualHeight * (DataContext as Video).Video_source.Height);
+                Console.WriteLine("Result X = {0}, Y = {1}\n", maxLoc.X * 1.0 / imageCv.Width * (DataContext as Video).Video_source.Width, maxLoc.Y * 1.0 / imageCv.Height * (DataContext as Video).Video_source.Height);
+                if (maxVal > 0.55)
+                {
+                    Canvas.SetLeft(sreault, maxLoc.X * 1.0 / imageCv.Width * image.ActualWidth);
+                    Canvas.SetTop(sreault, maxLoc.Y * 1.0 / imageCv.Height * image.ActualHeight);
+                    sreault.Visibility = Visibility.Visible;
+                }
+            }
         }
     }
 }
