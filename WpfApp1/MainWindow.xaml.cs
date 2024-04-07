@@ -398,7 +398,7 @@ namespace WpfApp1
             }
             if (flag == 1)
             {
-                (DataContext as Video).Video_source = dic_image2[selectedKey*5];
+                (DataContext as Video).Video_source = dic_image2[selectedKey];
             }
         }
 
