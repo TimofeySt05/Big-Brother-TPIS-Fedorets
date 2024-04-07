@@ -166,6 +166,19 @@ namespace WpfApp1
             return bmp;
         }
 
+        public BitmapSource GetBitmapSource(Bitmap bitmap)
+        {
+            BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap
+            (
+                bitmap.GetHbitmap(),
+                IntPtr.Zero,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions()
+            );
+
+            return bitmapSource;
+        }
+
         public static CroppedBitmap GetCroppedBitmap(BitmapSource src, double x, double y, double w, double h )
         {
             double factorX, factorY;
@@ -281,18 +294,21 @@ namespace WpfApp1
                     var window = new OpenCvSharp.Window("Video Frame by Frame");
                     window.ShowImage(imageCv);
                 }*/
-                if (i % 3 == 0)
+                if (i % 5 == 0)
                 {
-                    BitmapSource frame = Convert(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image)); // в битмап
+                    BitmapSource frame = GetBitmapSource(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image)); // в битмап
                     if(!dic_image.ContainsKey(i)) dic_image[i] = frame;
-
+                    //Console.WriteLine(frame);
                 }//добавляем конвертированный в битмап сурс битмап в список битмапов
                 i++;
+                //var windo = new OpenCvSharp.Window("Video Frame by Frame");
+                //windo.ShowImage(image);
+                imageCv = image;
                 //window.ShowImage(image);  //для вывода в окно
             }
-
-
-            (DataContext as Video).List_Of_Frames = dic_image;
+            
+ 
+             (DataContext as Video).List_Of_Frames = dic_image;
             if (dic_image.Count!=0) (DataContext as Video).Video_source = dic_image[0];
             /*
             foreach (var frame in dic_image)
@@ -375,14 +391,14 @@ namespace WpfApp1
             int selectedKey = box.SelectedIndex;
             Canvas.SetLeft(rec, 0);
             Canvas.SetTop(rec, 0);
-
-            if (dic_image.ContainsKey(selectedKey) && flag==2)
+            //dic_image.ContainsKey(selectedKey)  раньше было в условии ниже
+            if (flag==2)
             {
-                (DataContext as Video).Video_source = dic_image[selectedKey]; 
+                (DataContext as Video).Video_source = dic_image[selectedKey*5]; 
             }
-            if (dic_image2.ContainsKey(selectedKey) && flag == 1)
+            if (flag == 1)
             {
-                (DataContext as Video).Video_source = dic_image2[selectedKey];
+                (DataContext as Video).Video_source = dic_image2[selectedKey*5];
             }
         }
 
@@ -391,12 +407,14 @@ namespace WpfApp1
             if ((DataContext as Video).Video_source != null && img.Source !=null)
             {
                 imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap((DataContext as Video).Video_source));
+                //Console.WriteLine(imageCv);
+                //Console.WriteLine(tempCv);
                 var result = new Mat();
                 result = imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed);
                 result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
 
                 //var window = new OpenCvSharp.Window("Video Frame by Frame");
-                //window.ShowImage(result);    // карта сходности
+                //window.ShowImage(tempCv);    // карта сходности
 
 
                 //IplImage result = new IplImage(w, h, BitDepth.F32, 1);
