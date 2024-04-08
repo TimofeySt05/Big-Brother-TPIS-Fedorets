@@ -395,18 +395,9 @@ namespace WpfApp1
                 result = imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed);
                 result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
 
-                //var window = new OpenCvSharp.Window("Video Frame by Frame");
-                //window.ShowImage(result);    // карта сходности
-
-
-                //IplImage result = new IplImage(w, h, BitDepth.F32, 1);
-                //result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
-                //Console.WriteLine("Wight VS = {0}, im = {1}",(DataContext as Video).Video_source.Width, image.ActualWidth);
-                //Console.WriteLine(imageCv.Width);
-                //Console.WriteLine(result.Width);
-                //Console.WriteLine(crop_res);
+                
                 Console.WriteLine(maxVal);
-                //Console.WriteLine("maxLoc: X = {0},Y = {1}, maxVal: {2}", maxLoc.X, maxLoc.Y, maxVal);
+                
                 Console.WriteLine("\nTemp X = {0}, Y = {1}", TP.X * 1.0 / image.ActualWidth * (DataContext as Video).Video_source.Width, TP.Y * 1.0 / image.ActualHeight * (DataContext as Video).Video_source.Height);
                 Console.WriteLine("Result X = {0}, Y = {1}\n", maxLoc.X * 1.0 / imageCv.Width * (DataContext as Video).Video_source.Width, maxLoc.Y * 1.0 / imageCv.Height * (DataContext as Video).Video_source.Height);
                 if (maxVal > 0.55)
