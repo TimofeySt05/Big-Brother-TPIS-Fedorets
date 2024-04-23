@@ -129,6 +129,7 @@ namespace WpfApp1
         bool selectFlag = false;
         Dictionary<int, BitmapSource> dic_image = new Dictionary<int, BitmapSource>();
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
+        string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp", ".ico", ".webp", ".raw" };
         double crop_im;
 
         Mat imageCv;
@@ -201,20 +202,24 @@ namespace WpfApp1
             {
                 for (int i = 0; i < fileNames.Length; i++)
                 {
-                    BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
-                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    if (photonames.Contains(System.IO.Path.GetExtension(fileNames[i])))
+                    {
+                        BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
 
-                    // Преобразование BitmapImage в BitmapSource
-                    BitmapSource bitmapSource = bitmapImage as BitmapSource;
+                        // Преобразование BitmapImage в BitmapSource
+                        BitmapSource bitmapSource = bitmapImage as BitmapSource;
 
-                    if (!dic_image2.ContainsKey(i)) {
-                        dic_image2.Add(i, bitmapSource);
-                            }
+                        if (!dic_image2.ContainsKey(i))
+                        {
+                            dic_image2.Add(i, bitmapSource);
+                        }
+                    }
 
                 }
 
                 (DataContext as Video).List_Of_Frames = dic_image2;
-                (DataContext as Video).Video_source = dic_image2[0];
+                if(dic_image2.Count != 0) (DataContext as Video).Video_source = dic_image2[0];
             }
 
 
