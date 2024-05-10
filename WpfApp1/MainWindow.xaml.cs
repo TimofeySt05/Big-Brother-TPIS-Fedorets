@@ -127,6 +127,7 @@ namespace WpfApp1
         int flag = 0;
         System.Windows.Point startPoint;
         bool selectFlag = false;
+        bool searchcomplflag = false;
         Dictionary<int, BitmapSource> dic_image = new Dictionary<int, BitmapSource>();
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
         Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
@@ -152,6 +153,7 @@ namespace WpfApp1
         void SearchForSimilar()
         {
             int i = 0;
+            dic_spos.Clear();
             foreach (BitmapSource s in (DataContext as Video).List_Of_Frames.Values)
             {
                 Console.WriteLine(i);
@@ -243,6 +245,8 @@ namespace WpfApp1
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             flag = 1;
+            searchcomplflag = false;
+            dic_image2.Clear();
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.ShowDialog();
             Path = fbd.SelectedPath;
@@ -278,6 +282,8 @@ namespace WpfApp1
         private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
         {
             flag = 2;
+            searchcomplflag = false;
+            dic_image.Clear();
             System.Windows.Forms.OpenFileDialog fbd = new System.Windows.Forms.OpenFileDialog(); //выбор файла. Есть в папке с проектом
             fbd.ShowDialog();
             Path = fbd.FileName;
@@ -410,7 +416,7 @@ namespace WpfApp1
                 (DataContext as Video).Video_source = dic_image2[selectedKey];
             }
 
-            if ((DataContext as Video).Video_source != null && img.Source != null)
+            if ((DataContext as Video).Video_source != null && img.Source != null && searchcomplflag == true)
             {
                 ShowSimilar(selectedKey);
             }
@@ -420,7 +426,7 @@ namespace WpfApp1
         {
             if ((DataContext as Video).Video_source != null && img.Source != null)
             {
-               
+                searchcomplflag = true;
                 SearchForSimilar();
             }
         }
