@@ -68,8 +68,8 @@ namespace WpfApp1
                 OnPropertyChanged("Video_source");
             }
         }
-        private List<int> countOfFrames = new List<int>();
-        public List<int> CountOfFrames
+        private ChartValues<int> countOfFrames = new ChartValues<int>();
+        public ChartValues<int> CountOfFrames
         {
             get { return countOfFrames; }
             set
@@ -468,6 +468,10 @@ namespace WpfApp1
                     {
                         Title = "Example Series",
                         Values = (DataContext as Video).Dist
+                    },
+                    new ColumnSeries
+                    {
+                     Values = (DataContext as Video).CountOfFrames
                     }
                 };
                 chart.Series = SeriesCollection;
