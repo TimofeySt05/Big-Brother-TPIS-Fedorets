@@ -34,6 +34,14 @@ using Rectangle = System.Windows.Shapes.Rectangle;
 using Point = System.Windows.Point;
 using System.Drawing.Imaging;
 using System.Net;
+using OpenCvSharp.Aruco;
+using System.Collections;
+using System.Windows.Forms.DataVisualization.Charting;
+using LiveCharts;
+using LiveCharts.Defaults;
+using System.Collections.ObjectModel;
+using LiveCharts.Wpf.Charts.Base;
+using LiveCharts.Wpf;
 
 namespace WpfApp1
 {
@@ -60,6 +68,37 @@ namespace WpfApp1
                 OnPropertyChanged("Video_source");
             }
         }
+        private List<int> countOfFrames = new List<int>();
+        public List<int> CountOfFrames
+        {
+            get { return countOfFrames; }
+            set
+            {
+                countOfFrames = value;
+                OnPropertyChanged("CountOfFrames");
+            }
+        }
+        private ChartValues<double> dist = new ChartValues<double>();
+        public ChartValues<double> Dist
+        {
+            get { return dist; }
+            set
+            {
+                dist = value;
+                OnPropertyChanged("Dist");
+            }
+        }
+        //private ObservableCollection<Point> lineValues;
+        //public ObservableCollection<Point> LineValues
+        //{
+        //    get { return lineValues; }
+        //    set
+        //    {
+        //        lineValues = value;
+        //        OnPropertyChanged("LineValues");
+        //    }
+        //}
+
 
         private string video_name;
         public string Video_name
@@ -116,9 +155,10 @@ namespace WpfApp1
 
 
 
+
     public partial class MainWindow : System.Windows.Window
     {
-
+        public LiveCharts.SeriesCollection SeriesCollection { get; set; }
         string Path = " ";
         int currentIndex = 0;
         string[] fileNames;
@@ -133,6 +173,11 @@ namespace WpfApp1
         Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
         //string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp", ".ico", ".webp", ".raw" };
         double crop_im;
+        List<double> X = new List<double>();
+        List<double> Y = new List<double>();
+        List<int> countofFrames = new List<int>();
+        List<double> DIST = new List<double>();
+       
 
         Mat imageCv;
         Mat tempCv;
@@ -143,6 +188,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             this.DataContext = new Video();
+            
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(Sec);
@@ -164,6 +210,7 @@ namespace WpfApp1
                 List<double> TP = new List<double>() {maxLoc.X, maxLoc.Y, maxVal};
                 dic_spos.Add(i,  TP);
                 i++;
+                countofFrames.Add(i);
             }
             
 
@@ -397,6 +444,38 @@ namespace WpfApp1
             selectFlag = false;
 
             rec.ReleaseMouseCapture();
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            
+            if(dic_spos != null)
+            {
+                foreach (var value in dic_spos.Values)
+                {
+                    X.Add(value[0]);
+                    Y.Add(value[1]);                       
+                }
+                int size = X.Count;
+                for (int i = 0; i < size-1; ++i)
+                {
+                    (DataContext as Video).Dist.Add(Math.Sqrt(((X[i] - X[i+1])* (X[i] - X[i + 1]))+ ((Y[i] - Y[i + 1]) * (Y[i] - Y[i + 1]))));
+                }
+
+                SeriesCollection = new LiveCharts.SeriesCollection
+                {
+                    new LineSeries
+                    {
+                        Title = "Example Series",
+                        Values = (DataContext as Video).Dist
+                    }
+                };
+                chart.Series = SeriesCollection;
+                Console.WriteLine((DataContext as Video).Dist.Count);
+
+
+            }
+            
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

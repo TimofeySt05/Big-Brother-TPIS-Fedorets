@@ -3,30 +3,30 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApp1" d:DataContext="{d:DesignInstance Type=local:Video}"
+        xmlns:local="clr-namespace:WpfApp1" xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf" d:DataContext="{d:DesignInstance Type=local:Video}"
         mc:Ignorable="d"
         Title="MainWindow" Name ="MWindow"  Height="450" Width="800">
-    <Grid>
+    <Grid Margin="0,0,0,-16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="125*"></RowDefinition>
+            <RowDefinition Height="92*"></RowDefinition>
+            <RowDefinition Height="109*"></RowDefinition>
+            <RowDefinition Height="109*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Button Grid.Column="0" Grid.Row="3" Content="Choose file" HorizontalAlignment="Center" Height="50"  VerticalAlignment="Center" Width="100" Click="Button_Click"/>
+        <Button Grid.Row="3" Content="Choose file" HorizontalAlignment="Center" Height="50"  VerticalAlignment="Center" Width="100" Click="Button_Click"/>
 
         <Button Grid.Column="1" Grid.Row="3" Content="Video" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Click_1" Height="50" Width="100"/>
 
         <Button Grid.Row="3" Content="Find" Margin="204,35,204,35" Click="Button_Click_2" Grid.ColumnSpan="2"/>
 
-        <Canvas Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="3" x:Name="canv" Margin="20,20,20,20" ClipToBounds="True" >
-            <Image Name="image" Height="{Binding ActualHeight, ElementName=canv, Mode=OneWay}" Width="{Binding ActualWidth, ElementName=canv, Mode=OneWay}" Source="{Binding Video_source}" Canvas.Top="0" Canvas.Left="0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Canvas Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" x:Name="canv" Margin="20,20,224,10" ClipToBounds="True" >
+            <Image Name="image" Height="188" Width="292" Source="{Binding Video_source}" Canvas.Top="0" Canvas.Left="0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <Canvas Name="rec_can"  Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}"  Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}">
                 <Rectangle x:Name="rec" Width="100" Height="100" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
                 <Rectangle x:Name="sreault" Width="100" Height="100" Fill="Transparent" Stroke="Green" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" Visibility="Hidden" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseMove="rec_MouseMove" MouseLeftButtonUp="rec_MouseLeftButtonUp" />
@@ -34,10 +34,10 @@
 
         </Canvas>
 
-        <Image Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" x:Name="img" Margin="20,20,20,20"/>
+        <Image Grid.Row="2" x:Name="img" Margin="6,10,163,10"/>
 
         <ListBox Grid.Column="2" Grid.Row="2" Grid.RowSpan="2" d:ItemsSource="{d:SampleData ItemCount=5}" Name="box" Margin="20,55,20,20" RenderTransformOrigin="0.43,-0.486" ItemsSource="{Binding List_Of_Frames}" SelectionChanged="ListBox_SelectionChanged"/>
-
-
+        <Button Content="graph" HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="3" VerticalAlignment="Center" Click="Button_Click_3" Height="20" Width="35" />
+        <lvc:CartesianChart Name="chart" Grid.Column="1" Margin="98,20,20,106" Grid.RowSpan="3" Grid.ColumnSpan="2" />
     </Grid>
 </Window>
