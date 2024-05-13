@@ -202,10 +202,10 @@ namespace WpfApp1
             this.DataContext = new Video();
             (DataContext as Video).a = 50;
 
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(Sec);
-            //timer.Tick += Timer_Tick;
-            timer.Start();
+            //timer = new DispatcherTimer();
+            //timer.Interval = TimeSpan.FromSeconds(Sec);
+            ////timer.Tick += Timer_Tick;
+            //timer.Start();
         }
 
         void SearchForSimilar()
@@ -523,7 +523,7 @@ namespace WpfApp1
             sreault.Visibility = Visibility.Hidden;
            
                 //dic_image.ContainsKey(selectedKey)  раньше было в условии ниже
-            if (flag == 2)
+            if (flag == 2 && dic_image.ContainsKey(selectedKey))
             {
                 (DataContext as Video).Video_source = dic_image[selectedKey * 5];
             }
