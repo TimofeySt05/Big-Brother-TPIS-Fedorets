@@ -99,7 +99,16 @@ namespace WpfApp1
         //    }
         //}
 
-
+        private int A;
+        public int a
+        {
+            get { return A; }
+            set
+            {
+                A = value;
+                OnPropertyChanged("a");
+            }
+        }
         private string video_name;
         public string Video_name
         {
@@ -175,8 +184,11 @@ namespace WpfApp1
         double crop_im;
         List<double> X = new List<double>();
         List<double> Y = new List<double>();
+        ChartValues<double> X1 = new ChartValues<double>();
+        ChartValues<double> Y1 = new ChartValues<double>();
         List<int> countofFrames = new List<int>();
         List<double> DIST = new List<double>();
+         
        
 
         Mat imageCv;
@@ -188,7 +200,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             this.DataContext = new Video();
-            
+            (DataContext as Video).a = 50;
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(Sec);
@@ -207,6 +219,14 @@ namespace WpfApp1
                 var result = new Mat();
                 result = imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed);
                 result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
+                //if (i == 50)
+                //{
+                //    //result.ConvertTo(result, MatType.CV_8U);
+                //    Cv2.ImShow("result", result);
+                //    Cv2.WaitKey();
+                    
+                //}
+               
                 List<double> TP = new List<double>() {maxLoc.X, maxLoc.Y, maxVal};
                 dic_spos.Add(i,  TP);
                 i++;
@@ -448,40 +468,53 @@ namespace WpfApp1
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            
-            if(dic_spos != null)
+            ChartValues<ScatterPoint> m = new ChartValues<ScatterPoint>();
+
+
+            if (dic_spos != null)
             {
+                X1.Clear();
+                Y1.Clear();
+                //(DataContext as Video).Dist.Clear();
                 foreach (var value in dic_spos.Values)
                 {
-                    X.Add(value[0]);
-                    Y.Add(value[1]);                       
+                    ScatterPoint tmp = new ScatterPoint(value[0], value[1]);
+                    m.Add(tmp);
+                    //X1.Add(value[0]);
+                    //Y1.Add(value[1]);                       
                 }
-                int size = X.Count;
-                for (int i = 0; i < size-1; ++i)
-                {
-                    (DataContext as Video).Dist.Add(Math.Sqrt(((X[i] - X[i+1])* (X[i] - X[i + 1]))+ ((Y[i] - Y[i + 1]) * (Y[i] - Y[i + 1]))));
-                }
+                //int size = X.Count;
+                //for (int i = 0; i < size; ++i)
+                //{
+                //    (DataContext as Video).Dist.Add(Math.Sqrt(((X[i] - X[0])* (X[i] - X[0]))+ ((Y[i] - Y[0]) * (Y[i] - Y[0]))));
+                //}
 
+                //SeriesCollection = new LiveCharts.SeriesCollection
+                //{
+                //    new LineSeries
+                //    {
+                //        Title = "Example Series",
+                //        //Values = (DataContext as Video).Dist
+                //        Values = X1
+                //    }//,
+                //    //new ColumnSeries
+                //    //{
+                //    // //Values = (DataContext as Video).CountOfFrames
+                //    // Values = Y1
+                //    //}
+                //};
                 SeriesCollection = new LiveCharts.SeriesCollection
+            {
+                new LineSeries
                 {
-                    new LineSeries
-                    {
-                        Title = "Example Series",
-                        Values = (DataContext as Video).Dist
-                    },
-                    new ColumnSeries
-                    {
-                     Values = (DataContext as Video).CountOfFrames
-                    }
-                };
+                    Values = m,
+                },
+             
+            };
                 chart.Series = SeriesCollection;
-                Console.WriteLine((DataContext as Video).Dist.Count);
-
-
-            }
-            
+                //Console.WriteLine((DataContext as Video).Dist.Count);
+            }           
         }
-
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             int selectedKey = box.SelectedIndex;

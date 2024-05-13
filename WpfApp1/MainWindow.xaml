@@ -28,8 +28,8 @@
         <Canvas Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" x:Name="canv" Margin="20,20,224,10" ClipToBounds="True" >
             <Image Name="image" Height="188" Width="292" Source="{Binding Video_source}" Canvas.Top="0" Canvas.Left="0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <Canvas Name="rec_can"  Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}"  Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}">
-                <Rectangle x:Name="rec" Width="100" Height="100" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
-                <Rectangle x:Name="sreault" Width="100" Height="100" Fill="Transparent" Stroke="Green" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" Visibility="Hidden" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseMove="rec_MouseMove" MouseLeftButtonUp="rec_MouseLeftButtonUp" />
+                <Rectangle x:Name="rec" Width="{Binding a}" Height="{Binding a}" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
+                <Rectangle x:Name="sreault" Width="{Binding a}" Height="{Binding a}" Fill="Transparent" Stroke="Green" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" Visibility="Hidden" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseMove="rec_MouseMove" MouseLeftButtonUp="rec_MouseLeftButtonUp" />
             </Canvas>
 
         </Canvas>
