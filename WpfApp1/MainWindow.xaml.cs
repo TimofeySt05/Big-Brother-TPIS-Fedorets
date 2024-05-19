@@ -531,6 +531,22 @@ namespace WpfApp1
                 //Console.WriteLine((DataContext as Video).Dist.Count);
             }           
         }
+
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            Canvas.SetLeft(rec, 0);
+            Canvas.SetTop(rec, 0);
+            if ((DataContext as Video).a<=70) (DataContext as Video).a += 10;
+
+        }
+
+        private void Button_Click_5(object sender, RoutedEventArgs e)
+        {
+            Canvas.SetLeft(rec, 0);
+            Canvas.SetTop(rec, 0);
+            if ((DataContext as Video).a >=20) (DataContext as Video).a -= 10;
+        }
+
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {           
             int selectedKey = box.SelectedIndex;
