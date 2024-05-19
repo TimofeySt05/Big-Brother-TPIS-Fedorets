@@ -42,6 +42,8 @@ using LiveCharts.Defaults;
 using System.Collections.ObjectModel;
 using LiveCharts.Wpf.Charts.Base;
 using LiveCharts.Wpf;
+using System.Threading;
+
 
 namespace WpfApp1
 {
@@ -189,8 +191,9 @@ namespace WpfApp1
         ChartValues<double> Y1 = new ChartValues<double>();
         List<int> countofFrames = new List<int>();
         List<double> DIST = new List<double>();
-         
-       
+
+
+
 
         Mat imageCv;
         Mat tempCv;
@@ -226,8 +229,7 @@ namespace WpfApp1
                 //    Cv2.ImShow("result", result);
                 //    Cv2.WaitKey();
                     
-                //}
-               
+                //}              
                 List<double> TP = new List<double>() {maxLoc.X, maxLoc.Y, maxVal};
                 dic_spos.Add(i,  TP);
                 i++;
@@ -313,6 +315,8 @@ namespace WpfApp1
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             flag = 1;
+            Canvas.SetLeft(rec, 0);
+            Canvas.SetTop(rec,0);
             searchcomplflag = false;
             (DataContext as Video).Video_source = null;
             (DataContext as Video).List_Of_Frames=null;
@@ -360,6 +364,8 @@ namespace WpfApp1
         private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
         {
             flag = 2;
+            Canvas.SetLeft(rec, 0);
+            Canvas.SetTop(rec, 0);
             (DataContext as Video).Video_source = null;
             (DataContext as Video).List_Of_Frames = null;
             searchcomplflag = false;
@@ -433,9 +439,6 @@ namespace WpfApp1
                 }
 
             }
-
-
-
 
         }
 
