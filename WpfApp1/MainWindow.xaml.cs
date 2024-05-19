@@ -68,6 +68,7 @@ namespace WpfApp1
                 OnPropertyChanged("Video_source");
             }
         }
+        
         private ChartValues<int> countOfFrames = new ChartValues<int>();
         public ChartValues<int> CountOfFrames
         {
@@ -116,7 +117,7 @@ namespace WpfApp1
             set
             {
                 video_name = value;
-                string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp", ".ico", ".webp", ".raw" };
+                string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp", ".webp", ".raw" };
                 if (!string.IsNullOrEmpty(video_name) && System.IO.File.Exists(video_name) && Directory.Exists(System.IO.Path.GetDirectoryName(video_name)))
                 { //1
                     if (photonames.Contains(System.IO.Path.GetExtension(value)))
@@ -170,7 +171,7 @@ namespace WpfApp1
         public LiveCharts.SeriesCollection SeriesCollection { get; set; }
         string Path = " ";
         int currentIndex = 0;
-        string[] fileNames;
+        string[] filenames;
         double Sec = 0.05;
         private DispatcherTimer timer;
         int flag = 0;
@@ -180,7 +181,7 @@ namespace WpfApp1
         Dictionary<int, BitmapSource> dic_image = new Dictionary<int, BitmapSource>();
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
         Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
-        //string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp", ".ico", ".webp", ".raw" };
+        string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp",".webp", ".raw" };
         double crop_im;
         List<double> X = new List<double>();
         List<double> Y = new List<double>();
@@ -313,33 +314,43 @@ namespace WpfApp1
         {
             flag = 1;
             searchcomplflag = false;
+            (DataContext as Video).Video_source = null;
+            (DataContext as Video).List_Of_Frames=null;
+            img.Source = null;
             dic_image2.Clear();
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.ShowDialog();
             Path = fbd.SelectedPath;
-            if (Path != "" && Path != null) fileNames = Directory.GetFiles(Path).ToArray();
+            if (Path != "" && Path != null) filenames = Directory.GetFiles(Path).ToArray();
+            List<string> fileNames = new List<string>();
+            for (int i = 0; i < filenames.Length; ++i)
+            {
+                if (photonames.Contains(System.IO.Path.GetExtension(filenames[i])))
+                {
+                    fileNames.Add(filenames[i]);
+                }
+            }
+            int SIZE = fileNames.Count();
             if (fileNames != null)
             {
-                for (int i = 0; i < fileNames.Length; i++)
+                for (int i = 0; i < SIZE; i++)
                 {
-                   // if (photonames.Contains(System.IO.Path.GetExtension(fileNames[i])))
-                    //{
-                        BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
-                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    
+                    BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    BitmapSource bitmapSource = bitmapImage as BitmapSource;
 
-                        // Преобразование BitmapImage в BitmapSource
-                        BitmapSource bitmapSource = bitmapImage as BitmapSource;
 
-                        if (!dic_image2.ContainsKey(i))
+                    if (!dic_image2.ContainsKey(i))
                         {
                             dic_image2.Add(i, bitmapSource);
                         }
                   //  }
 
                 }
-
+                
                 (DataContext as Video).List_Of_Frames = dic_image2;
-                (DataContext as Video).Video_source = dic_image2[0];
+                if(dic_image2.Count!=0) (DataContext as Video).Video_source = dic_image2[0];
             }
 
 
@@ -349,6 +360,8 @@ namespace WpfApp1
         private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
         {
             flag = 2;
+            (DataContext as Video).Video_source = null;
+            (DataContext as Video).List_Of_Frames = null;
             searchcomplflag = false;
             dic_image.Clear();
             System.Windows.Forms.OpenFileDialog fbd = new System.Windows.Forms.OpenFileDialog(); //выбор файла. Есть в папке с проектом
@@ -516,18 +529,18 @@ namespace WpfApp1
             }           
         }
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
+        {           
             int selectedKey = box.SelectedIndex;
             Canvas.SetLeft(rec, 0);
             Canvas.SetTop(rec, 0);
             sreault.Visibility = Visibility.Hidden;
-           
-                //dic_image.ContainsKey(selectedKey)  раньше было в условии ниже
-            if (flag == 2 && dic_image.ContainsKey(selectedKey))
+
+            //dic_image.ContainsKey(selectedKey)  раньше было в условии ниже
+            if (flag == 2 && (DataContext as Video).Video_source != null)
             {
                 (DataContext as Video).Video_source = dic_image[selectedKey * 5];
             }
-            if (flag == 1)
+            if (flag == 1 && (DataContext as Video).Video_source != null)
             {
                 (DataContext as Video).Video_source = dic_image2[selectedKey];
             }
