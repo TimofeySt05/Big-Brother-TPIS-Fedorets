@@ -43,7 +43,7 @@ using System.Collections.ObjectModel;
 using LiveCharts.Wpf.Charts.Base;
 using LiveCharts.Wpf;
 using System.Threading;
-
+using ThreadState = System.Threading.ThreadState;
 
 namespace WpfApp1
 {
@@ -182,23 +182,26 @@ namespace WpfApp1
         bool searchcomplflag = false;
         Dictionary<int, BitmapSource> dic_image = new Dictionary<int, BitmapSource>();
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
-        Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
+        static Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
         string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp",".webp", ".raw" };
         double crop_im;
         List<double> X = new List<double>();
         List<double> Y = new List<double>();
         ChartValues<double> X1 = new ChartValues<double>();
         ChartValues<double> Y1 = new ChartValues<double>();
-        List<int> countofFrames = new List<int>();
+        static List<int> countofFrames = new List<int>();
         List<double> DIST = new List<double>();
+        static Dictionary<int, BitmapSource> tmp = new Dictionary<int, BitmapSource> ();
+
+        Thread t = new Thread(SearchForSimilar);
+        
 
 
 
-
-        Mat imageCv;
-        Mat tempCv;
-        double minVal, maxVal;
-        OpenCvSharp.Point minLoc, maxLoc;
+        static Mat imageCv;
+        static Mat tempCv;
+        static double minVal, maxVal;
+        static OpenCvSharp.Point minLoc, maxLoc;
         Point TP;
         public MainWindow()
         {
@@ -212,14 +215,18 @@ namespace WpfApp1
             //timer.Start();
         }
 
-        void SearchForSimilar()
+        static void SearchForSimilar()
         {
             int i = 0;
             dic_spos.Clear();
-            foreach (BitmapSource s in (DataContext as Video).List_Of_Frames.Values)
+            foreach (BitmapSource s in tmp.Values)
             {
                 Console.WriteLine(i);
-                imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(s));
+                //imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(s));
+                s.Dispatcher.Invoke(() =>
+                {
+                    imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(s));
+                });
                 var result = new Mat();
                 result = imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed);
                 result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
@@ -235,7 +242,7 @@ namespace WpfApp1
                 i++;
                 countofFrames.Add(i);
             }
-            
+                      
 
             //var window = new OpenCvSharp.Window("Video Frame by Frame");
             //window.ShowImage(tempCv);    // карта сходности
@@ -256,7 +263,7 @@ namespace WpfApp1
             }
             else sreault.Visibility = Visibility.Hidden;
         }
-        Bitmap GetBitmap(BitmapSource source)
+        static Bitmap GetBitmap(BitmapSource source)
         {
             Bitmap bmp = new Bitmap(
               source.PixelWidth,
@@ -572,10 +579,22 @@ namespace WpfApp1
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
+            var Tmp = Process.GetCurrentProcess().Threads;
+            var ddd = t.ManagedThreadId;
+           foreach( ProcessThread i in Tmp)
+            {
+                Console.WriteLine(i.Id);
+            }
             if ((DataContext as Video).Video_source != null && img.Source != null)
             {
+                if(t.ThreadState == ThreadState.Running)
+                {
+                    t.Abort();
+                }
                 searchcomplflag = true;
-                SearchForSimilar();
+                tmp = (DataContext as Video).List_Of_Frames;
+                t.Start();
+                //SearchForSimilar();
             }
         }
     }
