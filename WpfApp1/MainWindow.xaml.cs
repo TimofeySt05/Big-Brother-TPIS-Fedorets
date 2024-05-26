@@ -44,6 +44,7 @@ using LiveCharts.Wpf.Charts.Base;
 using LiveCharts.Wpf;
 using System.Threading;
 using ThreadState = System.Threading.ThreadState;
+using System.Runtime.InteropServices;
 
 namespace WpfApp1
 {
@@ -193,7 +194,7 @@ namespace WpfApp1
         List<double> DIST = new List<double>();
         static Dictionary<int, BitmapSource> tmp = new Dictionary<int, BitmapSource> ();
 
-        Thread t = new Thread(SearchForSimilar);
+        List <Thread> threads = new List<Thread> ();
         
 
 
@@ -373,6 +374,7 @@ namespace WpfApp1
             flag = 2;
             Canvas.SetLeft(rec, 0);
             Canvas.SetTop(rec, 0);
+            img.Source = null;
             (DataContext as Video).Video_source = null;
             (DataContext as Video).List_Of_Frames = null;
             searchcomplflag = false;
@@ -579,23 +581,17 @@ namespace WpfApp1
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            var Tmp = Process.GetCurrentProcess().Threads;
-            var ddd = t.ManagedThreadId;
-           foreach( ProcessThread i in Tmp)
+            if (threads.Count > 0)
             {
-                Console.WriteLine(i.Id);
+                Thread t2 = threads[threads.Count - 1];
+                t2.Abort();
+                threads.RemoveAt(threads.Count - 1);
             }
-            if ((DataContext as Video).Video_source != null && img.Source != null)
-            {
-                if(t.ThreadState == ThreadState.Running)
-                {
-                    t.Abort();
-                }
-                searchcomplflag = true;
-                tmp = (DataContext as Video).List_Of_Frames;
-                t.Start();
-                //SearchForSimilar();
-            }
+            Thread t1 = new Thread(SearchForSimilar);
+            threads.Add(t1);
+            tmp = (DataContext as Video).List_Of_Frames;
+            t1.Start();
         }
+        
     }
 }
