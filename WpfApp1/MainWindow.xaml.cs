@@ -256,13 +256,17 @@ namespace WpfApp1
         }
         void ShowSimilar(int slk)
         {
-            if (dic_spos[slk][2] > 0.55)
+            if (dic_spos.ContainsKey(slk))
             {
-                Canvas.SetLeft(sreault, dic_spos[slk][0] * 1.0 / imageCv.Width * image.ActualWidth);
-                Canvas.SetTop(sreault,dic_spos[slk][1] * 1.0 / imageCv.Height * image.ActualHeight);
-                sreault.Visibility = Visibility.Visible;
+                if (dic_spos[slk][2] > 0.55)
+                {
+                    Canvas.SetLeft(sreault, dic_spos[slk][0] * 1.0 / imageCv.Width * image.ActualWidth);
+                    Canvas.SetTop(sreault, dic_spos[slk][1] * 1.0 / imageCv.Height * image.ActualHeight);
+                    sreault.Visibility = Visibility.Visible;
+                }
+                else sreault.Visibility = Visibility.Hidden;
             }
-            else sreault.Visibility = Visibility.Hidden;
+            
         }
         static Bitmap GetBitmap(BitmapSource source)
         {
@@ -581,6 +585,7 @@ namespace WpfApp1
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
+            searchcomplflag = true;
             if (threads.Count > 0)
             {
                 Thread t2 = threads[threads.Count - 1];
