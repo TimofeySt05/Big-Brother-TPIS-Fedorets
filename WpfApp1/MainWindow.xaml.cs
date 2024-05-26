@@ -27,7 +27,6 @@ using System.Runtime.Serialization;
 using static System.Net.WebRequestMethods;
 using System.Windows.Threading;
 using OpenCvSharp;
-//using Window = OpenCvSharp.Window;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Text.RegularExpressions;
 using Rectangle = System.Windows.Shapes.Rectangle;
@@ -92,27 +91,29 @@ namespace WpfApp1
                 OnPropertyChanged("Dist");
             }
         }
-        //private ObservableCollection<Point> lineValues;
-        //public ObservableCollection<Point> LineValues
-        //{
-        //    get { return lineValues; }
-        //    set
-        //    {
-        //        lineValues = value;
-        //        OnPropertyChanged("LineValues");
-        //    }
-        //}
 
-        private int A;
-        public int a
+        private int rec_size;
+        public int Rec_size
         {
-            get { return A; }
+            get { return rec_size; }
             set
             {
-                A = value;
-                OnPropertyChanged("a");
+                rec_size = value;
+                OnPropertyChanged("Rec_size");
             }
         }
+
+        private int sresault_size;
+        public int Sresault_size
+        {
+            get { return sresault_size; }
+            set
+            {
+                sresault_size = value;
+                OnPropertyChanged("Sresault_size");
+            }
+        }
+
         private string video_name;
         public string Video_name
         {
@@ -156,14 +157,7 @@ namespace WpfApp1
             }
         }
 
-        //public List<string> list_of_puctures;
-        //public List<string> List_Of_Pictires
-        //{
-        //    get { return list_of_puctures; }
-        //    set { list_of_puctures = value;
-        //        OnPropertyChanged("List_Of_Pictires");
-        //    }
-        //}
+        
     }
 
 
@@ -208,7 +202,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             this.DataContext = new Video();
-            (DataContext as Video).a = 50;
+            (DataContext as Video).Rec_size = 50;
 
             //timer = new DispatcherTimer();
             //timer.Interval = TimeSpan.FromSeconds(Sec);
@@ -242,17 +236,13 @@ namespace WpfApp1
                 dic_spos.Add(i,  TP);
                 i++;
                 countofFrames.Add(i);
+                GC.Collect();
             }
                       
 
             //var window = new OpenCvSharp.Window("Video Frame by Frame");
             //window.ShowImage(tempCv);    // карта сходности
 
-
-            //Console.WriteLine(maxVal);
-            //Console.WriteLine("\nTemp X = {0}, Y = {1}", TP.X * 1.0 / image.ActualWidth * (DataContext as Video).Video_source.Width, TP.Y * 1.0 / image.ActualHeight * (DataContext as Video).Video_source.Height);
-            //Console.WriteLine("Result X = {0}, Y = {1}\n", maxLoc.X * 1.0 / imageCv.Width * (DataContext as Video).Video_source.Width, maxLoc.Y * 1.0 / imageCv.Height * (DataContext as Video).Video_source.Height);
-           
         }
         void ShowSimilar(int slk)
         {
@@ -260,11 +250,11 @@ namespace WpfApp1
             {
                 if (dic_spos[slk][2] > 0.55)
                 {
-                    Canvas.SetLeft(sreault, dic_spos[slk][0] * 1.0 / imageCv.Width * image.ActualWidth);
-                    Canvas.SetTop(sreault, dic_spos[slk][1] * 1.0 / imageCv.Height * image.ActualHeight);
-                    sreault.Visibility = Visibility.Visible;
+                    Canvas.SetLeft(sresault, dic_spos[slk][0] * 1.0 / imageCv.Width * image.ActualWidth);
+                    Canvas.SetTop(sresault, dic_spos[slk][1] * 1.0 / imageCv.Height * image.ActualHeight);
+                    sresault.Visibility = Visibility.Visible;
                 }
-                else sreault.Visibility = Visibility.Hidden;
+                else sresault.Visibility = Visibility.Hidden;
             }
             
         }
@@ -306,7 +296,6 @@ namespace WpfApp1
 
             factorX = src.PixelWidth / src.Width;
             factorY = src.PixelHeight / src.Height;
-            //Console.WriteLine(factorY);
             return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w * factorX), (int)Math.Round(h * factorY)));
         }
 
@@ -339,13 +328,15 @@ namespace WpfApp1
             Path = fbd.SelectedPath;
             if (Path != "" && Path != null) filenames = Directory.GetFiles(Path).ToArray();
             List<string> fileNames = new List<string>();
-            for (int i = 0; i < filenames.Length; ++i)
+            if(filenames!=null) for (int i = 0; i < filenames.Length; ++i)
             {
                 if (photonames.Contains(System.IO.Path.GetExtension(filenames[i])))
                 {
                     fileNames.Add(filenames[i]);
                 }
             }
+
+
             int SIZE = fileNames.Count();
             if (fileNames != null)
             {
@@ -361,7 +352,6 @@ namespace WpfApp1
                         {
                             dic_image2.Add(i, bitmapSource);
                         }
-                  //  }
 
                 }
                 
@@ -391,7 +381,6 @@ namespace WpfApp1
             var capture = new VideoCapture(videoFile);
             //var window = new OpenCvSharp.Window("Video Frame by Frame");  //для вывода в окно
             var image = new Mat();
-            //var dic_image = new Dictionary<int, Bitmap>(); // словарь с кадрами
 
             int i = 0;
             while (capture.IsOpened()) //Получение кадров
@@ -399,38 +388,20 @@ namespace WpfApp1
                 capture.Read(image);
 
                 if (image.Empty()) break;
-                /*
-                if (i == 0)
-                {
-                    imageCv = image;
-                    var window = new OpenCvSharp.Window("Video Frame by Frame");
-                    window.ShowImage(imageCv);
-                }*/
+                
                 if (i % 5 == 0)
                 {
                     BitmapSource frame = GetBitmapSource(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image)); // в битмап
                     if (!dic_image.ContainsKey(i)) dic_image[i] = frame;
-                    //Console.WriteLine(frame);
                 }//добавляем конвертированный в битмап сурс битмап в список битмапов
                 i++;
-                //var windo = new OpenCvSharp.Window("Video Frame by Frame");
-                //windo.ShowImage(image);
                 imageCv = image;
-                //window.ShowImage(image);  //для вывода в окно
             }
 
 
              (DataContext as Video).List_Of_Frames = dic_image;
             if (dic_image.Count != 0) (DataContext as Video).Video_source = dic_image[0];
-            /*
-            foreach (var frame in dic_image)
-            {
-                Console.WriteLine($"Key: {frame.Key}, Value: {frame.Value}");
-            }
-            */
-
-
-            //Console.WriteLine(Frames.Count);
+           
         }
 
 
@@ -439,7 +410,7 @@ namespace WpfApp1
             selectFlag = true;
             rec.CaptureMouse();
             startPoint = e.GetPosition(rec);
-            sreault.Visibility = Visibility.Hidden;
+            sresault.Visibility = Visibility.Hidden;
             if (selectFlag && (DataContext as Video).Video_source != null)
             {
                 if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
@@ -473,15 +444,9 @@ namespace WpfApp1
 
 
                 var tempCrB = GetCroppedBitmap((DataContext as Video).Video_source, PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
-                //CroppedBitmap croppedBitmap = new CroppedBitmap((DataContext as Video).Video_source, new Int32Rect((int)PosCanv.X*4, (int)PosCanv.Y*4, (int)rec.ActualWidth, (int)rec.ActualHeight));
                 tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(tempCrB));
-                /*
-                var window = new OpenCvSharp.Window("Video Frame by Frame");
-                window.ShowImage(tempCv);
-                */
-
+                
                 img.Source = tempCrB;
-
 
             }
 
@@ -549,7 +514,7 @@ namespace WpfApp1
         {
             Canvas.SetLeft(rec, 0);
             Canvas.SetTop(rec, 0);
-            if ((DataContext as Video).a<=70) (DataContext as Video).a += 10;
+            if ((DataContext as Video).Rec_size<=70) (DataContext as Video).Rec_size += 10;
 
         }
 
@@ -557,7 +522,7 @@ namespace WpfApp1
         {
             Canvas.SetLeft(rec, 0);
             Canvas.SetTop(rec, 0);
-            if ((DataContext as Video).a >=20) (DataContext as Video).a -= 10;
+            if ((DataContext as Video).Rec_size >=20) (DataContext as Video).Rec_size -= 10;
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -565,9 +530,8 @@ namespace WpfApp1
             int selectedKey = box.SelectedIndex;
             Canvas.SetLeft(rec, 0);
             Canvas.SetTop(rec, 0);
-            sreault.Visibility = Visibility.Hidden;
+            sresault.Visibility = Visibility.Hidden;
 
-            //dic_image.ContainsKey(selectedKey)  раньше было в условии ниже
             if (flag == 2 && (DataContext as Video).Video_source != null)
             {
                 (DataContext as Video).Video_source = dic_image[selectedKey * 5];
@@ -586,6 +550,7 @@ namespace WpfApp1
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             searchcomplflag = true;
+            (DataContext as Video).Sresault_size = (DataContext as Video).Rec_size;
             if (threads.Count > 0)
             {
                 Thread t2 = threads[threads.Count - 1];
