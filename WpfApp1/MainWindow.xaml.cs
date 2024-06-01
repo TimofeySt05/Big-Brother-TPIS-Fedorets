@@ -316,8 +316,15 @@ namespace WpfApp1
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (thrFlag)
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog()==System.Windows.Forms.DialogResult.OK)
             {
+                if (threads.Count > 0)
+                {
+                    Thread t2 = threads[threads.Count - 1];
+                    t2.Abort();
+                    threads.RemoveAt(threads.Count - 1);
+                }
                 flag = 1;
                 Canvas.SetLeft(rec, 0);
                 Canvas.SetTop(rec, 0);
@@ -326,8 +333,7 @@ namespace WpfApp1
                 (DataContext as Video).List_Of_Frames = null;
                 img.Source = null;
                 dic_image2.Clear();
-                FolderBrowserDialog fbd = new FolderBrowserDialog();
-                fbd.ShowDialog();
+               
                 Path = fbd.SelectedPath;
                 if (Path != "" && Path != null) filenames = Directory.GetFiles(Path).ToArray();
                 List<string> fileNames = new List<string>();
@@ -368,8 +374,15 @@ namespace WpfApp1
 
         private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
         {
-            if (thrFlag)
+            System.Windows.Forms.OpenFileDialog fbd = new System.Windows.Forms.OpenFileDialog();
+            if (fbd.ShowDialog()==System.Windows.Forms.DialogResult.OK)
             {
+                if (threads.Count > 0)
+                {
+                    Thread t2 = threads[threads.Count - 1];
+                    t2.Abort();
+                    threads.RemoveAt(threads.Count - 1);
+                }
                 flag = 2;
                 Canvas.SetLeft(rec, 0);
                 Canvas.SetTop(rec, 0);
@@ -378,13 +391,10 @@ namespace WpfApp1
                 (DataContext as Video).List_Of_Frames = null;
                 searchcomplflag = false;
                 dic_image.Clear();
-                System.Windows.Forms.OpenFileDialog fbd = new System.Windows.Forms.OpenFileDialog(); //выбор файла. Есть в папке с проектом
-                fbd.ShowDialog();
                 Path = fbd.FileName;
                 string videoFile = " ";
                 if (Path != "" && Path != null) videoFile = Path;
                 var capture = new VideoCapture(videoFile);
-                //var window = new OpenCvSharp.Window("Video Frame by Frame");  //для вывода в окно
                 var image = new Mat();
 
                 int i = 0;
@@ -554,19 +564,22 @@ namespace WpfApp1
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            searchcomplflag = true;
-            thrFlag = false;
-            (DataContext as Video).Sresault_size = (DataContext as Video).Rec_size;
-            if (threads.Count > 0)
+            if ((DataContext as Video).Video_source != null && img.Source != null)
             {
-                Thread t2 = threads[threads.Count - 1];
-                t2.Abort();
-                threads.RemoveAt(threads.Count - 1);
+                searchcomplflag = true;
+                thrFlag = false;
+                (DataContext as Video).Sresault_size = (DataContext as Video).Rec_size;
+                if (threads.Count > 0)
+                {
+                    Thread t2 = threads[threads.Count - 1];
+                    t2.Abort();
+                    threads.RemoveAt(threads.Count - 1);
+                }
+                Thread t1 = new Thread(SearchForSimilar);
+                threads.Add(t1);
+                tmp = (DataContext as Video).List_Of_Frames;
+                t1.Start();
             }
-            Thread t1 = new Thread(SearchForSimilar);
-            threads.Add(t1);
-            tmp = (DataContext as Video).List_Of_Frames;
-            t1.Start();
         }
 
     }
