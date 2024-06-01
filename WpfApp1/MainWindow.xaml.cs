@@ -170,7 +170,6 @@ namespace WpfApp1
         int currentIndex = 0;
         string[] filenames;
         double Sec = 0.05;
-        private DispatcherTimer timer;
         int flag = 0;
         System.Windows.Point startPoint;
         bool selectFlag = false;
@@ -188,12 +187,9 @@ namespace WpfApp1
         static List<int> countofFrames = new List<int>();
         List<double> DIST = new List<double>();
         static Dictionary<int, BitmapSource> tmp = new Dictionary<int, BitmapSource>();
-        static bool thrFlag = true;
-
+        Point PosCanv = new Point();
         List<Thread> threads = new List<Thread>();
-
-
-
+        bool fl = false;
 
         static Mat imageCv;
         static Mat tempCv;
@@ -205,10 +201,6 @@ namespace WpfApp1
             InitializeComponent();
             this.DataContext = new Video();
             (DataContext as Video).Rec_size = 50;
-            //timer = new DispatcherTimer();
-            //timer.Interval = TimeSpan.FromSeconds(Sec);
-            ////timer.Tick += Timer_Tick;
-            //timer.Start();
         }
 
         static void SearchForSimilar()
@@ -218,31 +210,19 @@ namespace WpfApp1
             foreach (BitmapSource s in tmp.Values)
             {
                 Console.WriteLine(i);
-                //imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(s));
                 s.Dispatcher.Invoke(() =>
                 {
                     imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(s));
                 });
                 var result = new Mat();
                 result = imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed);
-                result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
-                //if (i == 50)
-                //{
-                //    //result.ConvertTo(result, MatType.CV_8U);
-                //    Cv2.ImShow("result", result);
-                //    Cv2.WaitKey();
-
-                //}              
+                result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);           
                 List<double> TP = new List<double>() { maxLoc.X, maxLoc.Y, maxVal };
                 dic_spos.Add(i, TP);
                 i++;
                 countofFrames.Add(i);
                 GC.Collect();
             }
-
-            thrFlag = true;
-            //var window = new OpenCvSharp.Window("Video Frame by Frame");
-            //window.ShowImage(tempCv);    // карта сходности
 
         }
         void ShowSimilar(int slk)
@@ -326,8 +306,8 @@ namespace WpfApp1
                     threads.RemoveAt(threads.Count - 1);
                 }
                 flag = 1;
-                Canvas.SetLeft(rec, 0);
-                Canvas.SetTop(rec, 0);
+                Canvas.SetLeft(rec, 0.0);
+                Canvas.SetTop(rec, 0.0);
                 searchcomplflag = false;
                 (DataContext as Video).Video_source = null;
                 (DataContext as Video).List_Of_Frames = null;
@@ -344,18 +324,17 @@ namespace WpfApp1
                             fileNames.Add(filenames[i]);
                         }
                     }
-
+                //System.Drawing.Image i_g = System.Drawing.Image.FromFile(filenames[0]);
+                //double W  = i_g.Width;
 
                 int SIZE = fileNames.Count();
                 if (fileNames != null)
                 {
                     for (int i = 0; i < SIZE; i++)
                     {
-
                         BitmapImage bitmapImage = new BitmapImage(new Uri(fileNames[i], UriKind.Absolute));
                         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                         BitmapSource bitmapSource = bitmapImage as BitmapSource;
-
 
                         if (!dic_image2.ContainsKey(i))
                         {
@@ -365,7 +344,17 @@ namespace WpfApp1
                     }
 
                     (DataContext as Video).List_Of_Frames = dic_image2;
-                    if (dic_image2.Count != 0) (DataContext as Video).Video_source = dic_image2[0];
+                    
+
+                }
+                if (dic_image2.Count != 0)
+                {
+                    (DataContext as Video).Video_source = dic_image2[0];
+
+                    var temp1 = GetCroppedBitmap((DataContext as Video).Video_source, 0, 0, (DataContext as Video).Rec_size+1, (DataContext as Video).Rec_size+1);
+                    img.Source = temp1;
+                    tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp1));
+
                 }
             }
 
@@ -395,27 +384,44 @@ namespace WpfApp1
                 string videoFile = " ";
                 if (Path != "" && Path != null) videoFile = Path;
                 var capture = new VideoCapture(videoFile);
-                var image = new Mat();
+                var Image = new Mat();
 
                 int i = 0;
-                while (capture.IsOpened()) //Получение кадров
+                while (capture.IsOpened()) 
                 {
-                    capture.Read(image);
+                    capture.Read(Image);
 
-                    if (image.Empty()) break;
+                    if (Image.Empty()) break;
 
                     if (i % 5 == 0)
                     {
-                        BitmapSource frame = GetBitmapSource(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(image)); // в битмап
+                        BitmapSource frame = GetBitmapSource(OpenCvSharp.Extensions.BitmapConverter.ToBitmap(Image)); // в битмап
                         if (!dic_image.ContainsKey(i)) dic_image[i] = frame;
-                    }//добавляем конвертированный в битмап сурс битмап в список битмапов
+                    }
                     i++;
-                    imageCv = image;
+                    imageCv = Image;
                 }
 
 
              (DataContext as Video).List_Of_Frames = dic_image;
-                if (dic_image.Count != 0) (DataContext as Video).Video_source = dic_image[0];
+                if (dic_image.Count != 0)
+                {
+                    (DataContext as Video).Video_source = dic_image[0];
+                    if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+                    {
+                        crop_im = (DataContext as Video).Video_source.Width / image.Width;
+                    }
+                    else
+                    {
+                        crop_im = (DataContext as Video).Video_source.Height / image.Height;
+                    }
+                    PosCanv = rec.TranslatePoint(new Point(0, 0), image);
+                    var temp = GetCroppedBitmap(dic_image[0], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
+                    img.Source = temp;
+                    tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));
+
+                   
+                }
             }
         }
 
@@ -454,13 +460,12 @@ namespace WpfApp1
                 }
 
 
-                Point PosCanv = rec.TranslatePoint(new Point(0, 0), image);
+                PosCanv = rec.TranslatePoint(new Point(0, 0), image);
                 TP = rec.TranslatePoint(new Point(0, 0), image);
 
 
                 var tempCrB = GetCroppedBitmap((DataContext as Video).Video_source, PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
                 tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(tempCrB));
-
                 img.Source = tempCrB;
 
             }
@@ -484,34 +489,12 @@ namespace WpfApp1
             {
                 X1.Clear();
                 Y1.Clear();
-                //(DataContext as Video).Dist.Clear();
                 foreach (var value in dic_spos.Values)
                 {
                     ScatterPoint tmp = new ScatterPoint(value[0], value[1]);
-                    m.Add(tmp);
-                    //X1.Add(value[0]);
-                    //Y1.Add(value[1]);                       
+                    m.Add(tmp);                               
                 }
-                //int size = X.Count;
-                //for (int i = 0; i < size; ++i)
-                //{
-                //    (DataContext as Video).Dist.Add(Math.Sqrt(((X[i] - X[0])* (X[i] - X[0]))+ ((Y[i] - Y[0]) * (Y[i] - Y[0]))));
-                //}
-
-                //SeriesCollection = new LiveCharts.SeriesCollection
-                //{
-                //    new LineSeries
-                //    {
-                //        Title = "Example Series",
-                //        //Values = (DataContext as Video).Dist
-                //        Values = X1
-                //    }//,
-                //    //new ColumnSeries
-                //    //{
-                //    // //Values = (DataContext as Video).CountOfFrames
-                //    // Values = Y1
-                //    //}
-                //};
+                
                 SeriesCollection = new LiveCharts.SeriesCollection
             {
                 new LineSeries
@@ -521,7 +504,6 @@ namespace WpfApp1
 
             };
                 chart.Series = SeriesCollection;
-                //Console.WriteLine((DataContext as Video).Dist.Count);
             }
         }
 
@@ -539,6 +521,8 @@ namespace WpfApp1
             Canvas.SetTop(rec, 0);
             if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
         }
+
+
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -567,7 +551,6 @@ namespace WpfApp1
             if ((DataContext as Video).Video_source != null && img.Source != null)
             {
                 searchcomplflag = true;
-                thrFlag = false;
                 (DataContext as Video).Sresault_size = (DataContext as Video).Rec_size;
                 if (threads.Count > 0)
                 {
