@@ -51,7 +51,7 @@ namespace WpfApp1
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
     /// 
-
+   
     class Video : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -156,15 +156,42 @@ namespace WpfApp1
                 OnPropertyChanged("List_Of_Frames");
             }
         }
+        private int progress;
+        public int Progress
+        {
+            get { return progress; }
+            set
+            {
+                progress = value;
+                OnPropertyChanged("Progress");
+            }
+        }
 
 
     }
 
 
+    public class TextBoxWriter : TextWriter
+    {
+        private readonly System.Windows.Controls.TextBox _textBox;
 
+        public TextBoxWriter(System.Windows.Controls.TextBox textBox)
+        {
+            _textBox = textBox;
+        }
+
+        public override void Write(char value)
+        {
+            _textBox.Dispatcher.Invoke(() => _textBox.AppendText(value.ToString()));
+        }
+
+        public override Encoding Encoding => Encoding.ASCII;
+    }
 
     public partial class MainWindow : System.Windows.Window
     {
+       
+       
         public LiveCharts.SeriesCollection SeriesCollection { get; set; }
         string Path = " ";
         int currentIndex = 0;
@@ -185,35 +212,43 @@ namespace WpfApp1
         ChartValues<double> X1 = new ChartValues<double>();
         ChartValues<double> Y1 = new ChartValues<double>();
         static List<int> countofFrames = new List<int>();
-        List<double> DIST = new List<double>();
         static Dictionary<int, BitmapSource> tmp = new Dictionary<int, BitmapSource>();
         Point PosCanv = new Point();
         List<Thread> threads = new List<Thread>();
         bool fl = false;
 
+
         static Mat imageCv;
         static Mat tempCv;
         static double minVal, maxVal;
         static OpenCvSharp.Point minLoc, maxLoc;
-        Point TP;
         public MainWindow()
         {
             InitializeComponent();
             this.DataContext = new Video();
             (DataContext as Video).Rec_size = 50;
+
+            var sw = new StringWriter();
+            Console.SetOut(sw);
+
+            // Перенаправляем вывод из StringWriter в TextBox
+            Console.SetOut(new TextBoxWriter(textBox));
         }
+        
 
         static void SearchForSimilar()
         {
             int i = 0;
             dic_spos.Clear();
             foreach (BitmapSource s in tmp.Values)
-            {
-                Console.WriteLine(i);
+            {              
+                Console.WriteLine(i); 
                 s.Dispatcher.Invoke(() =>
                 {
                     imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(s));
-                });
+                    
+
+                });    
                 var result = new Mat();
                 result = imageCv.MatchTemplate(tempCv, TemplateMatchModes.CCoeffNormed);
                 result.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);           
@@ -222,6 +257,7 @@ namespace WpfApp1
                 i++;
                 countofFrames.Add(i);
                 GC.Collect();
+                
             }
 
         }
@@ -257,6 +293,7 @@ namespace WpfApp1
             bmp.UnlockBits(data);
             return bmp;
         }
+        
 
         public BitmapSource GetBitmapSource(Bitmap bitmap)
         {
@@ -418,9 +455,7 @@ namespace WpfApp1
                     PosCanv = rec.TranslatePoint(new Point(0, 0), image);
                     var temp = GetCroppedBitmap(dic_image[0], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
                     img.Source = temp;
-                    tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));
-
-                   
+                    tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));                  
                 }
             }
         }
@@ -461,9 +496,6 @@ namespace WpfApp1
 
 
                 PosCanv = rec.TranslatePoint(new Point(0, 0), image);
-                TP = rec.TranslatePoint(new Point(0, 0), image);
-
-
                 var tempCrB = GetCroppedBitmap((DataContext as Video).Video_source, PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
                 tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(tempCrB));
                 img.Source = tempCrB;
@@ -522,7 +554,18 @@ namespace WpfApp1
             if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
         }
 
+        private void UpdateProgressBar(int value)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                (DataContext as Video).Progress = value;
+            });
+        }
 
+        private void ProgressBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            (DataContext as Video).Progress++;
+        }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -556,12 +599,14 @@ namespace WpfApp1
                 {
                     Thread t2 = threads[threads.Count - 1];
                     t2.Abort();
+                    (DataContext as Video).Progress = 0;
                     threads.RemoveAt(threads.Count - 1);
                 }
                 Thread t1 = new Thread(SearchForSimilar);
                 threads.Add(t1);
                 tmp = (DataContext as Video).List_Of_Frames;
                 t1.Start();
+
             }
         }
 
