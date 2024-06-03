@@ -594,10 +594,9 @@ namespace WpfApp1
 
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
-            if ((newPoint.X - startPoint.X + rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0)
-            {
-                if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
-            }
+
+          if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
+            
         
         }
 
