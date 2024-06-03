@@ -44,6 +44,7 @@ using LiveCharts.Wpf;
 using System.Threading;
 using ThreadState = System.Threading.ThreadState;
 using System.Runtime.InteropServices;
+using System.Linq.Expressions;
 
 namespace WpfApp1
 {
@@ -334,7 +335,16 @@ namespace WpfApp1
 
             factorX = src.PixelWidth / src.Width;
             factorY = src.PixelHeight / src.Height;
-            return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w * factorX), (int)Math.Round(h * factorY)));
+            try
+            {
+                return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w * factorX), (int)Math.Round(h * factorY)));
+            }
+            catch (ArgumentException)
+            {
+                factorX = 0;
+                factorY = 0;
+                return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w), (int)Math.Round(h)));
+            }
         }
 
         public static BitmapSource Convert(System.Drawing.Bitmap bitmap)
@@ -612,8 +622,8 @@ namespace WpfApp1
                     crop_im = (DataContext as Video).Video_source.Height / image.Height;
                 }
                 //PosCanv = rec.TranslatePoint(new Point(0, 0), image);
-                Canvas.SetLeft(rec, PosCanv.X);
-                Canvas.SetTop(rec, PosCanv.Y);
+               Canvas.SetLeft(rec, PosCanv.X);
+               Canvas.SetTop(rec, PosCanv.Y);
                 var temp = GetCroppedBitmap(dic_image[selectedKey * 5], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
                 img.Source = temp;
                 tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));
