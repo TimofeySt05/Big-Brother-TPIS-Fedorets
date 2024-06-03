@@ -170,23 +170,40 @@ namespace WpfApp1
 
     }
 
-
-    public class TextBoxWriter : TextWriter
+    public class ControlWriter : TextWriter
     {
-        private readonly System.Windows.Controls.TextBox _textBox;
+        private TextBlock _output;
+        private ScrollViewer _scrollViewer;
 
-        public TextBoxWriter(System.Windows.Controls.TextBox textBox)
+        public ControlWriter(TextBlock output, ScrollViewer scrollViewer)
         {
-            _textBox = textBox;
+            _output = output;
+            _scrollViewer = scrollViewer;
         }
 
         public override void Write(char value)
         {
-            _textBox.Dispatcher.Invoke(() => _textBox.AppendText(value.ToString()));
+            base.Write(value);
+            _output.Dispatcher.Invoke(() =>
+            {
+                _output.Text += value;
+                _scrollViewer.ScrollToBottom(); // Прокручиваем вниз при добавлении нового текста
+            });
         }
 
-        public override Encoding Encoding => Encoding.ASCII;
+        public override Encoding Encoding
+        {
+            get { return System.Text.Encoding.UTF8; }
+        }
+        public void ClearOutput()
+        {
+            _output.Dispatcher.Invoke(() =>
+            {
+                _output.Text = string.Empty; // Очищаем содержимое TextBlock
+            });
+        }
     }
+
 
     public partial class MainWindow : System.Windows.Window
     {
@@ -206,6 +223,7 @@ namespace WpfApp1
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
         static Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
         string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp", ".webp", ".raw" };
+        string[] videonames = new string[] { ".mp4", ".avi",".mov",".mkv"};
         double crop_im;
         List<double> X = new List<double>();
         List<double> Y = new List<double>();
@@ -227,22 +245,21 @@ namespace WpfApp1
             InitializeComponent();
             this.DataContext = new Video();
             (DataContext as Video).Rec_size = 50;
+            ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
+            Console.SetOut(new ControlWriter(textBlock, scrollViewer));
+            
 
-            var sw = new StringWriter();
-            Console.SetOut(sw);
-
-            // Перенаправляем вывод из StringWriter в TextBox
-            Console.SetOut(new TextBoxWriter(textBox));
         }
         
 
         static void SearchForSimilar()
         {
+            Console.WriteLine("Loading...");
             int i = 0;
             dic_spos.Clear();
             foreach (BitmapSource s in tmp.Values)
             {              
-                Console.WriteLine(i); 
+                
                 s.Dispatcher.Invoke(() =>
                 {
                     imageCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(s));
@@ -259,6 +276,9 @@ namespace WpfApp1
                 GC.Collect();
                 
             }
+            Console.WriteLine("FINISH");
+
+
 
         }
         void ShowSimilar(int slk)
@@ -333,6 +353,8 @@ namespace WpfApp1
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
+            controlWriter.ClearOutput();
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog()==System.Windows.Forms.DialogResult.OK)
             {
@@ -343,8 +365,8 @@ namespace WpfApp1
                     threads.RemoveAt(threads.Count - 1);
                 }
                 flag = 1;
-                Canvas.SetLeft(rec, 0.0);
-                Canvas.SetTop(rec, 0.0);
+                //Canvas.SetLeft(rec, 0.0);
+                //Canvas.SetTop(rec, 0.0);
                 searchcomplflag = false;
                 (DataContext as Video).Video_source = null;
                 (DataContext as Video).List_Of_Frames = null;
@@ -361,8 +383,6 @@ namespace WpfApp1
                             fileNames.Add(filenames[i]);
                         }
                     }
-                //System.Drawing.Image i_g = System.Drawing.Image.FromFile(filenames[0]);
-                //double W  = i_g.Width;
 
                 int SIZE = fileNames.Count();
                 if (fileNames != null)
@@ -385,10 +405,20 @@ namespace WpfApp1
 
                 }
                 if (dic_image2.Count != 0)
-                {
+                {                  
                     (DataContext as Video).Video_source = dic_image2[0];
+                    
+                    if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+                    {
+                        crop_im = (DataContext as Video).Video_source.Width / image.Width;
+                    }
+                    else
+                    {
+                        crop_im = (DataContext as Video).Video_source.Height / image.Height;
 
-                    var temp1 = GetCroppedBitmap((DataContext as Video).Video_source, 0, 0, (DataContext as Video).Rec_size+1, (DataContext as Video).Rec_size+1);
+                    }
+                    Point p = rec.TranslatePoint(new Point(0, 0), image);
+                    BitmapSource temp1 = GetCroppedBitmap((DataContext as Video).Video_source, p.X*crop_im, p.Y * crop_im, (DataContext as Video).Rec_size*crop_im, (DataContext as Video).Rec_size*crop_im);
                     img.Source = temp1;
                     tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp1));
 
@@ -400,8 +430,10 @@ namespace WpfApp1
 
         private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
         {
+            ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
+            controlWriter.ClearOutput();
             System.Windows.Forms.OpenFileDialog fbd = new System.Windows.Forms.OpenFileDialog();
-            if (fbd.ShowDialog()==System.Windows.Forms.DialogResult.OK)
+            if (fbd.ShowDialog()==System.Windows.Forms.DialogResult.OK && videonames.Contains(System.IO.Path.GetExtension(fbd.FileName)))
             {
                 if (threads.Count > 0)
                 {
@@ -410,8 +442,8 @@ namespace WpfApp1
                     threads.RemoveAt(threads.Count - 1);
                 }
                 flag = 2;
-                Canvas.SetLeft(rec, 0);
-                Canvas.SetTop(rec, 0);
+                //Canvas.SetLeft(rec, 0);
+                //Canvas.SetTop(rec, 0);
                 img.Source = null;
                 (DataContext as Video).Video_source = null;
                 (DataContext as Video).List_Of_Frames = null;
@@ -452,8 +484,8 @@ namespace WpfApp1
                     {
                         crop_im = (DataContext as Video).Video_source.Height / image.Height;
                     }
-                    PosCanv = rec.TranslatePoint(new Point(0, 0), image);
-                    var temp = GetCroppedBitmap(dic_image[0], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
+                    Point p = rec.TranslatePoint(new Point(0, 0), image);
+                    var temp = GetCroppedBitmap(dic_image[0], p.X * crop_im, p.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
                     img.Source = temp;
                     tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));                  
                 }
@@ -481,12 +513,12 @@ namespace WpfApp1
             }
 
         }
-
+        Point newPoint = new Point();
         private void rec_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (selectFlag && (DataContext as Video).Video_source != null)
             {
-                Point newPoint = e.GetPosition((IInputElement)rec.Parent);
+                newPoint = e.GetPosition((IInputElement)rec.Parent);
 
                 if ((newPoint.X - startPoint.X + rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0)
                 {
@@ -541,31 +573,25 @@ namespace WpfApp1
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
-            Canvas.SetLeft(rec, 0);
-            Canvas.SetTop(rec, 0);
-            if ((DataContext as Video).Rec_size <= 70) (DataContext as Video).Rec_size += 10;
-
+           
+            if ((newPoint.X - startPoint.X + rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0)
+            {
+                if ((DataContext as Video).Rec_size <= 70) (DataContext as Video).Rec_size += 10;
+                
+            }
+             
         }
 
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
-            Canvas.SetLeft(rec, 0);
-            Canvas.SetTop(rec, 0);
-            if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
-        }
-
-        private void UpdateProgressBar(int value)
-        {
-            Dispatcher.Invoke(() =>
+            if ((newPoint.X - startPoint.X + rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0)
             {
-                (DataContext as Video).Progress = value;
-            });
+                if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
+            }
+        
         }
 
-        private void ProgressBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            (DataContext as Video).Progress++;
-        }
+      
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -577,23 +603,56 @@ namespace WpfApp1
             if (flag == 2 && (DataContext as Video).Video_source != null)
             {
                 (DataContext as Video).Video_source = dic_image[selectedKey * 5];
+                if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+                {
+                    crop_im = (DataContext as Video).Video_source.Width / image.Width;
+                }
+                else
+                {
+                    crop_im = (DataContext as Video).Video_source.Height / image.Height;
+                }
+                //PosCanv = rec.TranslatePoint(new Point(0, 0), image);
+                Canvas.SetLeft(rec, PosCanv.X);
+                Canvas.SetTop(rec, PosCanv.Y);
+                var temp = GetCroppedBitmap(dic_image[selectedKey * 5], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
+                img.Source = temp;
+                tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));
             }
             if (flag == 1 && (DataContext as Video).Video_source != null)
             {
                 (DataContext as Video).Video_source = dic_image2[selectedKey];
+                if ((DataContext as Video).Video_source.Width >= (DataContext as Video).Video_source.Height)
+                {
+                    crop_im = (DataContext as Video).Video_source.Width / image.Width;
+                }
+                else
+                {
+                    crop_im = (DataContext as Video).Video_source.Height / image.Height;
+                }
+                //PosCanv = rec.TranslatePoint(new Point(0, 0), image);
+                Canvas.SetLeft(rec, PosCanv.X);
+                Canvas.SetTop(rec, PosCanv.Y);
+                var temp = GetCroppedBitmap(dic_image2[selectedKey], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
+                img.Source = temp;
+                tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));
             }
 
             if ((DataContext as Video).Video_source != null && img.Source != null && searchcomplflag == true)
             {
                 ShowSimilar(selectedKey);
             }
+
+            
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             if ((DataContext as Video).Video_source != null && img.Source != null)
             {
+                ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
+                controlWriter.ClearOutput();
                 searchcomplflag = true;
+
                 (DataContext as Video).Sresault_size = (DataContext as Video).Rec_size;
                 if (threads.Count > 0)
                 {
@@ -601,6 +660,7 @@ namespace WpfApp1
                     t2.Abort();
                     (DataContext as Video).Progress = 0;
                     threads.RemoveAt(threads.Count - 1);
+                   
                 }
                 Thread t1 = new Thread(SearchForSimilar);
                 threads.Add(t1);

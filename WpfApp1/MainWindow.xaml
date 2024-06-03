@@ -59,6 +59,9 @@
                 </TransformGroup>
             </Button.RenderTransform>
         </Button>
-        <TextBox x:Name="textBox" Grid.Column="2" HorizontalAlignment="Center" Margin="0,11,0,0" Grid.Row="2" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120" />
+
+        <ScrollViewer Name="scrollViewer" Grid.Column="2" Grid.Row="2" Margin="0,0,20,62">
+            <TextBlock Name="textBlock" Grid.Column="2" Grid.Row="2" TextWrapping="Wrap" Height="50" Width="247" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" Grid.IsSharedSizeScope="True"/>
+        </ScrollViewer>
     </Grid>
 </Window>
