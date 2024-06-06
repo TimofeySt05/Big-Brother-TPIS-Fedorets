@@ -1,50 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.Win32;
 using System.Drawing;
-using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using System.Windows.Interop;
-using System.Security.Cryptography;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using static System.Net.WebRequestMethods;
-using System.Windows.Threading;
 using OpenCvSharp;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Text.RegularExpressions;
-using Rectangle = System.Windows.Shapes.Rectangle;
 using Point = System.Windows.Point;
 using System.Drawing.Imaging;
-using System.Net;
-using OpenCvSharp.Aruco;
-using System.Collections;
-using System.Windows.Forms.DataVisualization.Charting;
 using LiveCharts;
 using LiveCharts.Defaults;
-using System.Collections.ObjectModel;
-using LiveCharts.Wpf.Charts.Base;
 using LiveCharts.Wpf;
 using System.Threading;
-using ThreadState = System.Threading.ThreadState;
-using System.Runtime.InteropServices;
-using System.Linq.Expressions;
 
 namespace WpfApp1
 {
@@ -52,7 +27,7 @@ namespace WpfApp1
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
     /// 
-   
+
     class Video : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -60,8 +35,8 @@ namespace WpfApp1
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
-        private BitmapSource video_source;
 
+        private BitmapSource video_source;  //источник изображения
         public BitmapSource Video_source
         {
             get { return video_source; }
@@ -71,6 +46,7 @@ namespace WpfApp1
                 OnPropertyChanged("Video_source");
             }
         }
+
 
         private ChartValues<int> countOfFrames = new ChartValues<int>();
         public ChartValues<int> CountOfFrames
@@ -82,6 +58,8 @@ namespace WpfApp1
                 OnPropertyChanged("CountOfFrames");
             }
         }
+
+
         private ChartValues<double> dist = new ChartValues<double>();
         public ChartValues<double> Dist
         {
@@ -92,6 +70,7 @@ namespace WpfApp1
                 OnPropertyChanged("Dist");
             }
         }
+
 
         private int rec_size;
         public int Rec_size
@@ -104,6 +83,7 @@ namespace WpfApp1
             }
         }
 
+
         private int sresault_size;
         public int Sresault_size
         {
@@ -114,6 +94,7 @@ namespace WpfApp1
                 OnPropertyChanged("Sresault_size");
             }
         }
+
 
         private string video_name;
         public string Video_name
@@ -147,6 +128,7 @@ namespace WpfApp1
             }
         }
 
+
         private Dictionary<int, BitmapSource> list_of_frames;
         public Dictionary<int, BitmapSource> List_Of_Frames
         {
@@ -157,6 +139,8 @@ namespace WpfApp1
                 OnPropertyChanged("List_Of_Frames");
             }
         }
+
+
         private int progress;
         public int Progress
         {
@@ -209,39 +193,42 @@ namespace WpfApp1
 
     public partial class MainWindow : System.Windows.Window
     {
-       
-       
-        public LiveCharts.SeriesCollection SeriesCollection { get; set; }
-        string Path = " ";
-        int currentIndex = 0;
-        string[] filenames;
-        double Sec = 0.05;
-        int flag = 0;
-        System.Windows.Point startPoint;
+        //флаги
         bool selectFlag = false;
         bool searchcomplflag = false;
-        
+        int flag = 0;
+
         Dictionary<int, BitmapSource> dic_image = new Dictionary<int, BitmapSource>();
         Dictionary<int, BitmapSource> dic_image2 = new Dictionary<int, BitmapSource>();
-        static Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
+        
+        public LiveCharts.SeriesCollection SeriesCollection { get; set; }
+
+        string Path = " ";
+        string[] filenames;
         string[] photonames = new string[] { ".jpg", ".png", ".jpeg", ".tiff", ".gif", ".bmp", ".webp", ".raw" };
         string[] videonames = new string[] { ".mp4", ".avi",".mov",".mkv"};
-        double crop_im;
-        List<double> X = new List<double>();
-        List<double> Y = new List<double>();
-        ChartValues<double> X1 = new ChartValues<double>();
-        ChartValues<double> Y1 = new ChartValues<double>();
-        static List<int> countofFrames = new List<int>();
-        static Dictionary<int, BitmapSource> tmp = new Dictionary<int, BitmapSource>();
-        Point PosCanv = new Point();
-        List<Thread> threads = new List<Thread>();
-        bool fl = false;
 
+        System.Windows.Point startPoint;
 
+        static Dictionary<int, List<double>> dic_spos = new Dictionary<int, List<double>>();    //в листе верхний левый X, верхний левый Y, коэффициент соответствия
         static Mat imageCv;
         static Mat tempCv;
         static double minVal, maxVal;
         static OpenCvSharp.Point minLoc, maxLoc;
+        static List<int> countofFrames = new List<int>();
+        static Dictionary<int, BitmapSource> tmp = new Dictionary<int, BitmapSource>();
+        
+        double crop_im;
+
+        List<Thread> threads = new List<Thread>();
+
+        ChartValues<double> X1 = new ChartValues<double>();
+        ChartValues<double> Y1 = new ChartValues<double>();
+        
+        Point PosCanv = new Point();
+        Point newPoint = new Point();
+
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -250,11 +237,10 @@ namespace WpfApp1
             ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
             Console.SetOut(new ControlWriter(textBlock, scrollViewer));
             
-
         }
         
 
-        static void SearchForSimilar()
+        static void SearchForSimilar() //поиск 
         {
             Console.WriteLine("Loading...");
 
@@ -284,7 +270,7 @@ namespace WpfApp1
 
 
         }
-        void ShowSimilar(int slk)
+        void ShowSimilar(int slk) // вывод результатов поиска, зеленого квадрата на нужных координатах
         {
             if (dic_spos.ContainsKey(slk))
             {
@@ -298,72 +284,11 @@ namespace WpfApp1
             }
 
         }
-        static Bitmap GetBitmap(BitmapSource source)
-        {
-            Bitmap bmp = new Bitmap(
-              source.PixelWidth,
-              source.PixelHeight,
-              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            BitmapData data = bmp.LockBits(
-              new System.Drawing.Rectangle(new System.Drawing.Point(0, 0), bmp.Size),
-              ImageLockMode.WriteOnly,
-              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-            source.CopyPixels(
-              Int32Rect.Empty,
-              data.Scan0,
-              data.Height * data.Stride,
-              data.Stride);
-            bmp.UnlockBits(data);
-            return bmp;
-        }
-        
+       
 
-        public BitmapSource GetBitmapSource(Bitmap bitmap)
-        {
-            BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap
-            (
-                bitmap.GetHbitmap(),
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions()
-            );
 
-            return bitmapSource;
-        }
 
-        public static CroppedBitmap GetCroppedBitmap(BitmapSource src, double x, double y, double w, double h)
-        {
-            double factorX, factorY;
-
-            factorX = src.PixelWidth / src.Width;
-            factorY = src.PixelHeight / src.Height;
-            try
-            {
-                return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w * factorX), (int)Math.Round(h * factorY)));
-            }
-            catch (ArgumentException)
-            {
-                factorX = 0;
-                factorY = 0;
-                return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w), (int)Math.Round(h)));
-            }
-        }
-
-        public static BitmapSource Convert(System.Drawing.Bitmap bitmap)
-        {
-            var bitmapData = bitmap.LockBits(
-                new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat);
-            var bitmapSource = BitmapSource.Create(
-                bitmapData.Width, bitmapData.Height,
-                bitmap.HorizontalResolution, bitmap.VerticalResolution,
-                PixelFormats.Bgr24, null,
-                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
-            bitmap.UnlockBits(bitmapData);
-            return bitmapSource;
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)  //открытие папки с картинками кнопка folder
         {
             ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
             controlWriter.ClearOutput();
@@ -441,8 +366,7 @@ namespace WpfApp1
 
         }
 
-
-        private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp
+        private void Button_Click_1(object sender, RoutedEventArgs e) //Преобразование видео в кадры. Библиотека OpenCvSharp кнопка video
         {
             ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
             controlWriter.ClearOutput();
@@ -509,8 +433,82 @@ namespace WpfApp1
             }
         }
 
+        private void Button_Click_2(object sender, RoutedEventArgs e) //запуск поиска выбранного участка кнопка find
+        {
+            if ((DataContext as Video).Video_source != null && img.Source != null)
+            {
+                ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
+                controlWriter.ClearOutput();
+                searchcomplflag = true;
 
-        private void rec_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+                (DataContext as Video).Sresault_size = (DataContext as Video).Rec_size;
+                if (threads.Count > 0)
+                {
+                    Thread t2 = threads[threads.Count - 1];
+                    t2.Abort();
+                    (DataContext as Video).Progress = 0;
+                    threads.RemoveAt(threads.Count - 1);
+
+                }
+                Thread t1 = new Thread(SearchForSimilar);
+                threads.Add(t1);
+                tmp = (DataContext as Video).List_Of_Frames;
+                t1.Start();
+
+            }
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e) //построение графика
+        {
+            ChartValues<ScatterPoint> m = new ChartValues<ScatterPoint>();
+
+
+            if (dic_spos != null)
+            {
+                X1.Clear();
+                Y1.Clear();
+                foreach (var value in dic_spos.Values)
+                {
+                    ScatterPoint tmp = new ScatterPoint(value[0], value[1]);
+                    m.Add(tmp);
+                }
+
+                SeriesCollection = new LiveCharts.SeriesCollection
+            {
+                new LineSeries
+                {
+                    Values = m,
+                },
+
+            };
+                chart.Series = SeriesCollection;
+            }
+        }
+
+        private void Button_Click_4(object sender, RoutedEventArgs e) //увеличение красного квадрата
+        {
+
+            if ((newPoint.X - startPoint.X + rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0)
+            {
+                if ((DataContext as Video).Rec_size <= 70) (DataContext as Video).Rec_size += 10;
+
+            }
+
+        }
+
+        private void Button_Click_5(object sender, RoutedEventArgs e) //уменьшение красного квадрата
+        {
+
+            if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
+
+
+        }
+
+
+
+
+
+        private void rec_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)//начало передвижения красного квадрата
         {
             selectFlag = true;
             rec.CaptureMouse();
@@ -529,9 +527,9 @@ namespace WpfApp1
 
             }
 
-        }
-        Point newPoint = new Point();
-        private void rec_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        } 
+        
+        private void rec_MouseMove(object sender, System.Windows.Input.MouseEventArgs e) //передвижение красного квадрата
         {
             if (selectFlag && (DataContext as Video).Video_source != null)
             {
@@ -554,62 +552,17 @@ namespace WpfApp1
 
         }
 
-        private void rec_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void rec_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)//конец передвижения красного квадрата
         {
             selectFlag = false;
 
             rec.ReleaseMouseCapture();
-        }
-
-        private void Button_Click_3(object sender, RoutedEventArgs e)
-        {
-            ChartValues<ScatterPoint> m = new ChartValues<ScatterPoint>();
-
-
-            if (dic_spos != null)
-            {
-                X1.Clear();
-                Y1.Clear();
-                foreach (var value in dic_spos.Values)
-                {
-                    ScatterPoint tmp = new ScatterPoint(value[0], value[1]);
-                    m.Add(tmp);                               
-                }
-                
-                SeriesCollection = new LiveCharts.SeriesCollection
-            {
-                new LineSeries
-                {
-                    Values = m,
-                },
-
-            };
-                chart.Series = SeriesCollection;
-            }
-        }
-
-        private void Button_Click_4(object sender, RoutedEventArgs e)
-        {
-           
-            if ((newPoint.X - startPoint.X + rec.ActualWidth) < image.ActualWidth && (newPoint.Y - startPoint.Y + rec.ActualHeight) < image.ActualHeight && (newPoint.X - startPoint.X) > 0 && (newPoint.Y - startPoint.Y) > 0)
-            {
-                if ((DataContext as Video).Rec_size <= 70) (DataContext as Video).Rec_size += 10;
-                
-            }
-             
-        }
-
-        private void Button_Click_5(object sender, RoutedEventArgs e)
-        {
-
-          if ((DataContext as Video).Rec_size >= 20) (DataContext as Video).Rec_size -= 10;
-            
+        } 
         
-        }
 
       
 
-        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)//выбор элемента в листбоксе
         {
             int selectedKey = box.SelectedIndex;
             Canvas.SetLeft(rec, 0);
@@ -627,7 +580,7 @@ namespace WpfApp1
                 {
                     crop_im = (DataContext as Video).Video_source.Height / image.Height;
                 }
-                //PosCanv = rec.TranslatePoint(new Point(0, 0), image);
+
                Canvas.SetLeft(rec, PosCanv.X);
                Canvas.SetTop(rec, PosCanv.Y);
                 var temp = GetCroppedBitmap(dic_image[selectedKey * 5], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
@@ -645,7 +598,7 @@ namespace WpfApp1
                 {
                     crop_im = (DataContext as Video).Video_source.Height / image.Height;
                 }
-                //PosCanv = rec.TranslatePoint(new Point(0, 0), image);
+
                 Canvas.SetLeft(rec, PosCanv.X);
                 Canvas.SetTop(rec, PosCanv.Y);
                 var temp = GetCroppedBitmap(dic_image2[selectedKey], PosCanv.X * crop_im, PosCanv.Y * crop_im, rec.ActualWidth * crop_im, rec.ActualHeight * crop_im);
@@ -661,30 +614,78 @@ namespace WpfApp1
             
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+
+
+
+        //
+        //
+        //Конверторы
+        //
+        //
+        static Bitmap GetBitmap(BitmapSource source)
         {
-            if ((DataContext as Video).Video_source != null && img.Source != null)
+            Bitmap bmp = new Bitmap(
+              source.PixelWidth,
+              source.PixelHeight,
+              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(
+              new System.Drawing.Rectangle(new System.Drawing.Point(0, 0), bmp.Size),
+              ImageLockMode.WriteOnly,
+              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(
+              Int32Rect.Empty,
+              data.Scan0,
+              data.Height * data.Stride,
+              data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
+        }
+
+        public BitmapSource GetBitmapSource(Bitmap bitmap)
+        {
+            BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap
+            (
+                bitmap.GetHbitmap(),
+                IntPtr.Zero,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions()
+            );
+
+            return bitmapSource;
+        }
+
+        public static CroppedBitmap GetCroppedBitmap(BitmapSource src, double x, double y, double w, double h)
+        {
+            double factorX, factorY;
+
+            factorX = src.PixelWidth / src.Width;
+            factorY = src.PixelHeight / src.Height;
+            try
             {
-                ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
-                controlWriter.ClearOutput();
-                searchcomplflag = true;
-
-                (DataContext as Video).Sresault_size = (DataContext as Video).Rec_size;
-                if (threads.Count > 0)
-                {
-                    Thread t2 = threads[threads.Count - 1];
-                    t2.Abort();
-                    (DataContext as Video).Progress = 0;
-                    threads.RemoveAt(threads.Count - 1);
-                   
-                }
-                Thread t1 = new Thread(SearchForSimilar);
-                threads.Add(t1);
-                tmp = (DataContext as Video).List_Of_Frames;
-                t1.Start();
-
+                return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w * factorX), (int)Math.Round(h * factorY)));
+            }
+            catch (ArgumentException)
+            {
+                factorX = 0;
+                factorY = 0;
+                return new CroppedBitmap(src, new Int32Rect((int)Math.Round(x * factorX), (int)Math.Round(y * factorY), (int)Math.Round(w), (int)Math.Round(h)));
             }
         }
+
+        public static BitmapSource Convert(System.Drawing.Bitmap bitmap)
+        {
+            var bitmapData = bitmap.LockBits(
+                new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat);
+            var bitmapSource = BitmapSource.Create(
+                bitmapData.Width, bitmapData.Height,
+                bitmap.HorizontalResolution, bitmap.VerticalResolution,
+                PixelFormats.Bgr24, null,
+                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+            bitmap.UnlockBits(bitmapData);
+            return bitmapSource;
+        }
+
 
     }
 }

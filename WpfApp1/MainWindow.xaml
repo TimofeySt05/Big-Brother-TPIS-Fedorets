@@ -31,21 +31,25 @@
         <Button Grid.Row="6" Grid.Column="2" Content="Video" Margin="20,20,20,20" Click="Button_Click_1" />
 
         <Button Grid.Row="6" Grid.Column="5" Content="Find" Margin="20,20,20,20" Click="Button_Click_2"  />
+        
+         <Button  Grid.Column="4" Grid.Row="6" Content="Graph" Margin="20,20,20,20" Click="Button_Click_3" />
+        
         <ScrollViewer x:Name="img_scroll" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4" Grid.RowSpan="6" Margin="20,20,20,20" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
         <Canvas x:Name="canv"  ClipToBounds="True" >
                 <Image Name="image" Width="{Binding ActualWidth, ElementName=img_scroll, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=img_scroll, Mode=OneWay}" Source="{Binding Video_source}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <Canvas Name="rec_can"  Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}"  Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}">
-                <Rectangle x:Name="rec" Width="{Binding Rec_size}" Height="{Binding Rec_size}" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
-                <Rectangle x:Name="sresault" Width="{Binding Sresault_size}" Height="{Binding Sresault_size}" Fill="Transparent" Stroke="Green" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" Visibility="Hidden" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseMove="rec_MouseMove" MouseLeftButtonUp="rec_MouseLeftButtonUp" />
+                <Canvas Name="rec_can"  Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}"  Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}">
+                    <Rectangle x:Name="rec" Width="{Binding Rec_size}" Height="{Binding Rec_size}" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
+                    <Rectangle x:Name="sresault" Width="{Binding Sresault_size}" Height="{Binding Sresault_size}" Fill="Transparent" Stroke="Green" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" Visibility="Hidden" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseMove="rec_MouseMove" MouseLeftButtonUp="rec_MouseLeftButtonUp" />
+                </Canvas>
             </Canvas>
-
-        </Canvas>
         </ScrollViewer>
+        
         <Image Grid.Column="4" Grid.Row="3" Grid.RowSpan="2" Grid.ColumnSpan="2" x:Name="img" Margin="10,10,10,10"/>
 
         <ListBox Grid.Column="6" Grid.Row="4" Grid.RowSpan="3" d:ItemsSource="{d:SampleData ItemCount=5}" Name="box" Margin="20,20,20,20" RenderTransformOrigin="0.43,-0.486" ItemsSource="{Binding List_Of_Frames.Keys}" SelectionChanged="ListBox_SelectionChanged" Background="White"/>
-        <Button  Grid.Column="4" Grid.Row="6" Content="Graph" Margin="20,20,20,20" Click="Button_Click_3"  />
-        <lvc:CartesianChart Name="chart"  Grid.Column="4" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="20,20,20,20"  />
+       
+        <lvc:CartesianChart Name="chart"  Grid.Column="4" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="20,20,20,20" Background="White" BorderBrush="Black"  />
+        
         <Button Content="+" Margin="20,20,20,20"  Width="50" Grid.Row="5" Grid.Column="5" RenderTransformOrigin="0.5,0.5" Click="Button_Click_4" HorizontalAlignment="Left">
             <Button.RenderTransform>
                 <TransformGroup>
@@ -61,6 +65,7 @@
                 </Style>
             </Button.Resources>
         </Button>
+        
         <Button Content="-" Margin="20,20,20,20" Width="50" Grid.Row="5" Grid.Column="4" RenderTransformOrigin="0.5,0.5" Click="Button_Click_5" HorizontalAlignment="Right">
             <Button.RenderTransform>
                 <TransformGroup>
@@ -80,5 +85,6 @@
         <ScrollViewer Name="scrollViewer" Grid.Column="6" Grid.Row="3" Margin="20,20,20,20" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
             <TextBlock Name="textBlock"  TextWrapping="Wrap" Height="50" Width="247" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" Grid.IsSharedSizeScope="True"/>
         </ScrollViewer>
+        
     </Grid>
 </Window>
