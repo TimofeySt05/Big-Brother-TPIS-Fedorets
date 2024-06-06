@@ -168,6 +168,7 @@ namespace WpfApp1
             }
         }
 
+       
 
     }
 
@@ -256,6 +257,7 @@ namespace WpfApp1
         static void SearchForSimilar()
         {
             Console.WriteLine("Loading...");
+
             int i = 0;
             dic_spos.Clear();
             foreach (BitmapSource s in tmp.Values)
@@ -375,8 +377,10 @@ namespace WpfApp1
                     threads.RemoveAt(threads.Count - 1);
                 }
                 flag = 1;
-                //Canvas.SetLeft(rec, 0.0);
-                //Canvas.SetTop(rec, 0.0);
+                Canvas.SetLeft(rec, 0.0);
+                Canvas.SetTop(rec, 0.0);
+                PosCanv.X = 0;
+                PosCanv.Y = 0;
                 searchcomplflag = false;
                 (DataContext as Video).Video_source = null;
                 (DataContext as Video).List_Of_Frames = null;
@@ -411,7 +415,6 @@ namespace WpfApp1
                     }
 
                     (DataContext as Video).List_Of_Frames = dic_image2;
-                    
 
                 }
                 if (dic_image2.Count != 0)
@@ -433,6 +436,7 @@ namespace WpfApp1
                     tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp1));
 
                 }
+                
             }
 
         }
@@ -452,8 +456,10 @@ namespace WpfApp1
                     threads.RemoveAt(threads.Count - 1);
                 }
                 flag = 2;
-                //Canvas.SetLeft(rec, 0);
-                //Canvas.SetTop(rec, 0);
+                Canvas.SetLeft(rec, 0);
+                Canvas.SetTop(rec, 0);
+                PosCanv.X = 0;
+                PosCanv.Y = 0;
                 img.Source = null;
                 (DataContext as Video).Video_source = null;
                 (DataContext as Video).List_Of_Frames = null;
@@ -499,6 +505,7 @@ namespace WpfApp1
                     img.Source = temp;
                     tempCv = OpenCvSharp.Extensions.BitmapConverter.ToMat(GetBitmap(temp));                  
                 }
+                
             }
         }
 

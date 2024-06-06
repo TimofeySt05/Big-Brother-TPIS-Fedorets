@@ -5,41 +5,48 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1" xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf" d:DataContext="{d:DesignInstance Type=local:Video}"
         mc:Ignorable="d"
-        Title="MainWindow" Name ="MWindow"  Height="450" Width="811">
-    <Grid Margin="0,0,0,-16">
+        Title="MainWindow" Name ="MWindow" Height="550" Width="950" Background="#FF8C9AA9" ResizeMode="NoResize">
+    <Grid Margin="0,0,0,0">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="125*"></RowDefinition>
-            <RowDefinition Height="92*"></RowDefinition>
-            <RowDefinition Height="109*"></RowDefinition>
-            <RowDefinition Height="109*"></RowDefinition>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Button Grid.Row="3" Content="Choose file" HorizontalAlignment="Center" Height="50"  VerticalAlignment="Center" Width="100" Click="Button_Click"/>
+        <Button Grid.Row="6" Grid.Column="1" Content="Folder" Margin="20,20,20,20"  Click="Button_Click" />
 
-        <Button Grid.Column="1" Grid.Row="3" Content="Video" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Click_1" Height="50" Width="100"/>
+        <Button Grid.Row="6" Grid.Column="2" Content="Video" Margin="20,20,20,20" Click="Button_Click_1" />
 
-        <Button Grid.Row="3" Content="Find" Margin="204,35,204,35" Click="Button_Click_2" Grid.ColumnSpan="2"/>
-
-        <Canvas Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" x:Name="canv" Margin="20,20,224,10" ClipToBounds="True" >
-            <Image Name="image" Height="186" Width="286" Source="{Binding Video_source}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button Grid.Row="6" Grid.Column="5" Content="Find" Margin="20,20,20,20" Click="Button_Click_2"  />
+        <ScrollViewer x:Name="img_scroll" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4" Grid.RowSpan="6" Margin="20,20,20,20" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+        <Canvas x:Name="canv"  ClipToBounds="True" >
+                <Image Name="image" Width="{Binding ActualWidth, ElementName=img_scroll, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=img_scroll, Mode=OneWay}" Source="{Binding Video_source}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <Canvas Name="rec_can"  Height="{Binding ActualHeight, ElementName=image, Mode=OneWay}"  Width="{Binding ActualWidth, ElementName=image, Mode=OneWay}">
                 <Rectangle x:Name="rec" Width="{Binding Rec_size}" Height="{Binding Rec_size}" Fill="Transparent" Stroke="Red" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" MouseMove="rec_MouseMove" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseLeftButtonUp="rec_MouseLeftButtonUp"/>
                 <Rectangle x:Name="sresault" Width="{Binding Sresault_size}" Height="{Binding Sresault_size}" Fill="Transparent" Stroke="Green" StrokeThickness="2" Canvas.Left="0" Canvas.Top="0" Visibility="Hidden" MouseLeftButtonDown="rec_MouseLeftButtonDown" MouseMove="rec_MouseMove" MouseLeftButtonUp="rec_MouseLeftButtonUp" />
             </Canvas>
 
         </Canvas>
+        </ScrollViewer>
+        <Image Grid.Column="4" Grid.Row="3" Grid.RowSpan="2" Grid.ColumnSpan="2" x:Name="img" Margin="10,10,10,10"/>
 
-        <Image Grid.Row="2" x:Name="img" Margin="6,10,163,10"/>
-
-        <ListBox Grid.Column="2" Grid.Row="2" Grid.RowSpan="2" d:ItemsSource="{d:SampleData ItemCount=5}" Name="box" Margin="20,55,20,20" RenderTransformOrigin="0.43,-0.486" ItemsSource="{Binding List_Of_Frames}" SelectionChanged="ListBox_SelectionChanged"/>
-        <Button Content="graph" HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="3" VerticalAlignment="Center" Click="Button_Click_3" Height="50" Width="37" />
-        <lvc:CartesianChart Name="chart" Grid.Column="1" Margin="98,20,20,106" Grid.RowSpan="3" Grid.ColumnSpan="2" />
-        <Button Content="+" Margin="212,25,32,58" Grid.Row="3" Grid.Column="1" RenderTransformOrigin="0.5,0.5" Click="Button_Click_4">
+        <ListBox Grid.Column="6" Grid.Row="4" Grid.RowSpan="3" d:ItemsSource="{d:SampleData ItemCount=5}" Name="box" Margin="20,20,20,20" RenderTransformOrigin="0.43,-0.486" ItemsSource="{Binding List_Of_Frames.Keys}" SelectionChanged="ListBox_SelectionChanged" Background="White"/>
+        <Button  Grid.Column="4" Grid.Row="6" Content="Graph" Margin="20,20,20,20" Click="Button_Click_3"  />
+        <lvc:CartesianChart Name="chart"  Grid.Column="4" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="20,20,20,20"  />
+        <Button Content="+" Margin="20,20,20,20"  Width="50" Grid.Row="5" Grid.Column="5" RenderTransformOrigin="0.5,0.5" Click="Button_Click_4" HorizontalAlignment="Left">
             <Button.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -48,8 +55,13 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Button.RenderTransform>
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="10"/>
+                </Style>
+            </Button.Resources>
         </Button>
-        <Button Content="-" Margin="212,65,32,19" Grid.Row="3" Grid.Column="1" RenderTransformOrigin="0.5,0.5" Click="Button_Click_5">
+        <Button Content="-" Margin="20,20,20,20" Width="50" Grid.Row="5" Grid.Column="4" RenderTransformOrigin="0.5,0.5" Click="Button_Click_5" HorizontalAlignment="Right">
             <Button.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -58,10 +70,15 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Button.RenderTransform>
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="10"/>
+                </Style>
+            </Button.Resources>
         </Button>
-
-        <ScrollViewer Name="scrollViewer" Grid.Column="2" Grid.Row="2" Margin="0,0,20,62">
-            <TextBlock Name="textBlock" Grid.Column="2" Grid.Row="2" TextWrapping="Wrap" Height="50" Width="247" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" Grid.IsSharedSizeScope="True"/>
+        
+        <ScrollViewer Name="scrollViewer" Grid.Column="6" Grid.Row="3" Margin="20,20,20,20" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+            <TextBlock Name="textBlock"  TextWrapping="Wrap" Height="50" Width="247" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" Grid.IsSharedSizeScope="True"/>
         </ScrollViewer>
     </Grid>
 </Window>
