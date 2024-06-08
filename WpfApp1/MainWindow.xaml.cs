@@ -265,9 +265,6 @@ namespace WpfApp1
                 
             }
             Console.WriteLine("FINISH");
-
-
-
         }
         void ShowSimilar(int slk) // вывод результатов поиска, зеленого квадрата на нужных координатах
         {
@@ -287,7 +284,7 @@ namespace WpfApp1
 
 
 
-        private void Button_Click(object sender, RoutedEventArgs e)  //открытие папки с картинками кнопка folder
+        private void Button_Click(object sender, RoutedEventArgs e)  //открытие папки с картинками кнопка photo
         {
             ControlWriter controlWriter = new ControlWriter(textBlock, scrollViewer);
             controlWriter.ClearOutput();
