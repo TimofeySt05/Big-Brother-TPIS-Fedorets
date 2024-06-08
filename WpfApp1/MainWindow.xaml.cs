@@ -243,7 +243,6 @@ namespace WpfApp1
         static void SearchForSimilar() //поиск 
         {
             Console.WriteLine("Loading...");
-
             int i = 0;
             dic_spos.Clear();
             foreach (BitmapSource s in tmp.Values)
